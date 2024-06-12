@@ -31,9 +31,9 @@ def parse_arguments():
     #                     type=str,
     #                     default="teknium/OpenHermes-2.5-Mistral-7B",
     #                     help='Mistral TensorRT model path')
-    # parser.add_argument('--phi',
-    #                     action="store_true",
-    #                     help='Phi')
+    parser.add_argument('--phi',
+                        action="store_true",
+                         help='Phi')
     # parser.add_argument('--phi_tensorrt_path',
     #                     type=str,
     #                     default="/root/TensorRT-LLM/examples/phi/phi_engine",
