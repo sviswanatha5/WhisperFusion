@@ -24,4 +24,5 @@ WORKDIR /root/
 COPY scripts/install-trt-llm.sh /root
 RUN bash install-trt-llm.sh && rm install-trt-llm.sh
 COPY scripts/setup-whisperfusion.sh /root/
-RUN ./setup-whisperfusion.sh
+ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
+RUN ./setup-whisperfusion.sh --no-cache
