@@ -94,26 +94,10 @@ if __name__ == "__main__":
     )
     whisper_process.start()
 
-    custom_llm_api = CustomLLMAPI(api_url=args.api_url, api_key=args.api_key, user_id=args.user_id)
-
-    def process_transcription(transcription_text):
-        try:
-            llm_response = custom_llm_api.query(transcription_text)
-            return llm_response
-        except Exception as e:
-            print(f"Error querying custom LLM API: {e}")
-            return None
-
-    def llm_process_function(transcription_queue, audio_queue):
-        while True:
-            transcription_text = transcription_queue.get()
-            if transcription_text:
-                llm_response = process_transcription(transcription_text)
-                if llm_response:
-                    audio_queue.put(llm_response)
+    custom_llm_api = CustomLLMAPI(api_url=args.api_url, api_key=args.api_key, user_id=args.user_id)    
 
     llm_process = multiprocessing.Process(
-        target=llm_process_function,
+        target=custom_llm_api.run,
         args=(transcription_queue, audio_queue)
     )
     llm_process.start()

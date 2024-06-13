@@ -24,3 +24,21 @@ class CustomLLMAPI:
         }
         response = requests.post(self.completion_url, json=post_data, headers=self.headers)
         return response.json()['data']['answer']
+    
+    def process_transcription(self, transcription_text):
+        try:
+            llm_response = self.query(transcription_text)
+            return llm_response
+        except Exception as e:
+            print(f"Error querying custom LLM API: {e}")
+            return None
+
+
+    def run(self, transcription_queue, audio_queue):
+        while True:
+            transcription_text = transcription_queue.get()
+            if transcription_text:
+                llm_response = self.process_transcription(transcription_text)
+                if llm_response:
+                    audio_queue.put(llm_response)
+                    
