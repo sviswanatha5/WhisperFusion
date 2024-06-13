@@ -30,15 +30,30 @@ class WhisperSpeechTTS:
             host, port
             ) as server:
             server.serve_forever()
+            
+    def set_processing(self, state: bool):
+        with self.lock:
+            self.processing = state
+
+    def is_processing(self):
+        with self.lock:
+            return self.processing
 
     def start_whisperspeech_tts(self, websocket, audio_queue=None):
         self.eos = False
         self.output_audio = None
 
         while True:
+            
+            # Wait for new LLM response only if not processing
+            if self.is_processing():
+                continue
+            
             llm_response = audio_queue.get()
             if audio_queue.qsize() != 0:
                 continue
+            
+            self.set_processing(True)
 
             # check if this websocket exists
             try:
@@ -71,4 +86,6 @@ class WhisperSpeechTTS:
                     websocket.send(self.output_audio.tobytes())
                 except Exception as e:
                     logging.error(f"[WhisperSpeech ERROR:] Audio error: {e}")
+            
+            self.set_processing(False)
 
