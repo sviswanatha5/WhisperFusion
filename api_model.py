@@ -77,7 +77,7 @@ class CustomLLMAPI:
                 audio_queue.put({"llm_output": test, "eos": self.eos})
                 llm_queue.put({
                         "uid": transcription_output["uid"],
-                        "llm_output": llm_response,
+                        "llm_output": test,
                         "eos": self.eos,
                         "latency": self.infer_time
                     })
