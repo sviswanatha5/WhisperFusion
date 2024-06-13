@@ -1,4 +1,6 @@
 import requests
+import logging
+logging.basicConfig(level = logging.INFO)
 
 class CustomLLMAPI:
     def __init__(self, api_url, api_key, user_id):
@@ -14,6 +16,7 @@ class CustomLLMAPI:
         if not self.conv_id:
             r = requests.get(self.new_conv_url + self.user_id, headers=self.headers)
             self.conv_id = r.json()['data']['id']
+            logging.info(r.json()['data'])
         post_data = {
             'conversation_id': self.conv_id,
             'messages': [{
@@ -37,8 +40,10 @@ class CustomLLMAPI:
     def run(self, transcription_queue, audio_queue):
         while True:
             transcription_text = transcription_queue.get()
+            logging.info("TEXT: " + transcription_text)
             if transcription_text:
                 llm_response = self.process_transcription(transcription_text)
+                logging.info("RESPONSE: " + llm_response)
                 if llm_response:
                     audio_queue.put(llm_response)
                     
