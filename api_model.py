@@ -40,10 +40,11 @@ class CustomLLMAPI:
     def run(self, transcription_queue, audio_queue):
         while True:
             transcription_text = transcription_queue.get()
-            logging.info("TEXT: " + transcription_text)
+            logging.info(f"Q: {transcription_queue}")
             if transcription_text:
+                logging.info(f"TEXt: {transcription_text}")
                 llm_response = self.process_transcription(transcription_text)
-                logging.info("RESPONSE: " + llm_response)
+                logging.info(f"RESPONSE: {llm_response}")
                 if llm_response:
                     audio_queue.put(llm_response)
                     
