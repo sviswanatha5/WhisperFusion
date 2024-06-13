@@ -12,6 +12,7 @@ class CustomLLMAPI:
         self.new_conv_url = self.api_url + 'new_conversation?user_id='
         self.completion_url = self.api_url + 'completion'
         self.last_prompt = ""
+        self.infer_time = 0
 
     def query(self, message):
         if not self.conv_id:
@@ -65,16 +66,19 @@ class CustomLLMAPI:
             # if prompt is same but EOS is True, we need that to send outputs to websockets
             if self.last_prompt == prompt and transcription_output["eos"]:
                 self.eos = transcription_output["eos"]
+                start = time.time()
                 llm_response = self.process_transcription(transcription_output['prompt'])
                 logging.info(f"RESPonSe: {llm_response}")
+                self.infer_time = time.time() - start
                 test = []
                 test.append(llm_response)
                 audio_queue.put({"llm_output": test, "eos": self.eos})
-                if self.eos and llm_response is not None:
-                    try:
-                        websocket.send(self.llm_response.tobytes())
-                    except Exception as e:
-                        logging.error(f"[LLM ERROR:] Text send error: {e}")
+                llm_queue.put({
+                        "uid": transcription_output["uid"],
+                        "llm_output": self.llm_response,
+                        "eos": self.eos,
+                        "latency": self.infer_time
+                    })
                 self.last_prompt = ""
                 continue
                 
