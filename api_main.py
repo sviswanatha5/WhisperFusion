@@ -13,31 +13,7 @@ from multiprocessing import Process, Manager, Value, Queue
 from whisper_live.trt_server import TranscriptionServer
 # from llm_service import TensorRTLLMEngine  # No longer needed
 from tts_service import WhisperSpeechTTS
-
-class CustomLLMAPI:
-    def __init__(self, api_url, api_key, user_id):
-        self.api_url = api_url
-        self.api_key = api_key
-        self.user_id = user_id
-        self.headers = {'Authorization': 'Bearer ' + self.api_key}
-        self.conv_id = ''
-        self.new_conv_url = self.api_url + 'new_conversation?user_id='
-        self.completion_url = self.api_url + 'completion'
-
-    def query(self, message):
-        if not self.conv_id:
-            r = requests.get(self.new_conv_url + self.user_id, headers=self.headers)
-            self.conv_id = r.json()['data']['id']
-        post_data = {
-            'conversation_id': self.conv_id,
-            'messages': [{
-                'role': 'user',
-                'content': message
-            }],
-            'stream': False
-        }
-        response = requests.post(self.completion_url, json=post_data, headers=self.headers)
-        return response.json()['data']['answer']
+from api_model import CustomLLMAPI
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
