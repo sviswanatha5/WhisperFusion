@@ -70,6 +70,11 @@ class CustomLLMAPI:
                 test = []
                 test.append(llm_response)
                 audio_queue.put({"llm_output": test, "eos": self.eos})
+                if self.eos and llm_response is not None:
+                    try:
+                        websocket.send(self.llm_response.tobytes())
+                    except Exception as e:
+                        logging.error(f"[LLM ERROR:] Text send error: {e}")
                 self.last_prompt = ""
                 continue
                 
