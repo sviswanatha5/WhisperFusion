@@ -176,7 +176,7 @@ class TranscriptionServer:
                     del websocket
                     break
 
-    def run(self, host, port=9090, transcription_queue=None, llm_queue=None, whisper_tensorrt_path=None, should_send_server_ready=None, lock):
+    def run(self, host, port=9090, transcription_queue=None, llm_queue=None, whisper_tensorrt_path=None, should_send_server_ready=None, lock=None):
         """
         Run the transcription server.
 
