@@ -73,7 +73,7 @@ class TranscriptionServer:
 
         return wait_time / 60
 
-    def recv_audio(self, websocket, transcription_queue=None, llm_queue=None, whisper_tensorrt_path=None, should_send_server_ready=None):
+    def recv_audio(self, websocket, transcription_queue=None, llm_queue=None, whisper_tensorrt_path=None, should_send_server_ready=None, lock=None):
         """
         Receive audio chunks from a client in an infinite loop.
         
@@ -133,49 +133,50 @@ class TranscriptionServer:
         no_voice_activity_chunks = 0
         print()
         while True:
-            try:
-                frame_data = websocket.recv()
-                frame_np = np.frombuffer(frame_data, dtype=np.float32)
-
-                # VAD
+            with lock:
                 try:
-                    speech_prob = self.vad_model(torch.from_numpy(frame_np.copy()), self.RATE).item()
-                    if speech_prob < self.vad_threshold:
-                        no_voice_activity_chunks += 1
-                        if no_voice_activity_chunks > 3:
-                            if not self.clients[websocket].eos:
-                                self.clients[websocket].set_eos(True)
-                            time.sleep(0.1)    # EOS stop receiving frames for a 100ms(to send output to LLM.)
-                        continue
-                    no_voice_activity_chunks = 0
-                    self.clients[websocket].set_eos(False)
+                    frame_data = websocket.recv()
+                    frame_np = np.frombuffer(frame_data, dtype=np.float32)
+
+                    # VAD
+                    try:
+                        speech_prob = self.vad_model(torch.from_numpy(frame_np.copy()), self.RATE).item()
+                        if speech_prob < self.vad_threshold:
+                            no_voice_activity_chunks += 1
+                            if no_voice_activity_chunks > 3:
+                                if not self.clients[websocket].eos:
+                                    self.clients[websocket].set_eos(True)
+                                time.sleep(0.1)    # EOS stop receiving frames for a 100ms(to send output to LLM.)
+                            continue
+                        no_voice_activity_chunks = 0
+                        self.clients[websocket].set_eos(False)
+
+                    except Exception as e:
+                        logging.error(e)
+                        return
+                    self.clients[websocket].add_frames(frame_np)
+
+                    elapsed_time = time.time() - self.clients_start_time[websocket]
+                    if elapsed_time >= self.max_connection_time:
+                        self.clients[websocket].disconnect()
+                        logging.warning(f"{self.clients[websocket]} Client disconnected due to overtime.")
+                        self.clients[websocket].cleanup()
+                        self.clients.pop(websocket)
+                        self.clients_start_time.pop(websocket)
+                        websocket.close()
+                        del websocket
+                        break
 
                 except Exception as e:
                     logging.error(e)
-                    return
-                self.clients[websocket].add_frames(frame_np)
-
-                elapsed_time = time.time() - self.clients_start_time[websocket]
-                if elapsed_time >= self.max_connection_time:
-                    self.clients[websocket].disconnect()
-                    logging.warning(f"{self.clients[websocket]} Client disconnected due to overtime.")
                     self.clients[websocket].cleanup()
                     self.clients.pop(websocket)
                     self.clients_start_time.pop(websocket)
-                    websocket.close()
+                    logging.info("[Whisper INFO:] Connection Closed.")
                     del websocket
                     break
 
-            except Exception as e:
-                logging.error(e)
-                self.clients[websocket].cleanup()
-                self.clients.pop(websocket)
-                self.clients_start_time.pop(websocket)
-                logging.info("[Whisper INFO:] Connection Closed.")
-                del websocket
-                break
-
-    def run(self, host, port=9090, transcription_queue=None, llm_queue=None, whisper_tensorrt_path=None, should_send_server_ready=None):
+    def run(self, host, port=9090, transcription_queue=None, llm_queue=None, whisper_tensorrt_path=None, should_send_server_ready=None, lock):
         """
         Run the transcription server.
 
@@ -194,6 +195,7 @@ class TranscriptionServer:
                 llm_queue=llm_queue,
                 whisper_tensorrt_path=whisper_tensorrt_path,
                 should_send_server_ready=should_send_server_ready,
+                lock=lock,
             ),
             host,
             port

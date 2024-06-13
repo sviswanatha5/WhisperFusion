@@ -65,7 +65,8 @@ if __name__ == "__main__":
             transcription_queue,
             llm_queue,
             args.whisper_tensorrt_path,
-            should_send_server_ready
+            should_send_server_ready,
+            lock
         )
     )
     whisper_process.start()
@@ -74,7 +75,7 @@ if __name__ == "__main__":
 
     llm_process = multiprocessing.Process(
         target=custom_llm_api.run,
-        args=(transcription_queue, audio_queue, llm_queue)
+        args=(transcription_queue, audio_queue, llm_queue, lock)
     )
     llm_process.start()
 

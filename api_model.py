@@ -1,5 +1,6 @@
 import requests
 import logging
+import time
 logging.basicConfig(level = logging.INFO)
 
 class CustomLLMAPI:
@@ -39,7 +40,7 @@ class CustomLLMAPI:
             return None
 
 
-    def run(self, transcription_queue, audio_queue, llm_queue):
+    def run(self, transcription_queue, audio_queue, llm_queue, lock):
         
         conversation_history = {}
         while True:
@@ -65,6 +66,7 @@ class CustomLLMAPI:
                                 
             # if prompt is same but EOS is True, we need that to send outputs to websockets
             if self.last_prompt == prompt and transcription_output["eos"]:
+                lock.acquire()
                 self.eos = transcription_output["eos"]
                 start = time.time()
                 llm_response = self.process_transcription(transcription_output['prompt'])
@@ -80,6 +82,7 @@ class CustomLLMAPI:
                         "latency": self.infer_time
                     })
                 self.last_prompt = ""
+                lock.release()
                 continue
                 
                 # conversation_history[transcription_output["uid"]].append(
