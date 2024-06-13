@@ -168,14 +168,14 @@ class TranscriptionServer:
                     del websocket
                     break
 
-                except Exception as e:
-                    logging.error(e)
-                    self.clients[websocket].cleanup()
-                    self.clients.pop(websocket)
-                    self.clients_start_time.pop(websocket)
-                    logging.info("[Whisper INFO:] Connection Closed.")
-                    del websocket
-                    break
+            except Exception as e:
+                logging.error(e)
+                self.clients[websocket].cleanup()
+                self.clients.pop(websocket)
+                self.clients_start_time.pop(websocket)
+                logging.info("[Whisper INFO:] Connection Closed.")
+                del websocket
+                break
 
     def run(self, host, port=9090, transcription_queue=None, llm_queue=None, whisper_tensorrt_path=None, should_send_server_ready=None, lock=None):
         """
