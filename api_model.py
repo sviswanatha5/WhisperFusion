@@ -67,7 +67,9 @@ class CustomLLMAPI:
                 self.eos = transcription_output["eos"]
                 llm_response = self.process_transcription(transcription_output['prompt'])
                 logging.info(f"RESPonSe: {llm_response}")
-                audio_queue.put({"llm_output": llm_response, "eos": self.eos})
+                test = []
+                test.append(llm_response)
+                audio_queue.put({"llm_output": test, "eos": self.eos})
                 self.last_prompt = ""
                 continue
                 
