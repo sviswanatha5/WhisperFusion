@@ -74,7 +74,7 @@ if __name__ == "__main__":
 
     llm_process = multiprocessing.Process(
         target=custom_llm_api.run,
-        args=(transcription_queue, audio_queue)
+        args=(transcription_queue, audio_queue, llm_queue)
     )
     llm_process.start()
 

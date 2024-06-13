@@ -37,7 +37,7 @@ class CustomLLMAPI:
             return None
 
 
-    def run(self, transcription_queue, audio_queue):
+    def run(self, transcription_queue, audio_queue, llm_queue):
         while True:
             transcription_text = transcription_queue.get()
             logging.info(f"Q: {transcription_queue}")
@@ -47,4 +47,30 @@ class CustomLLMAPI:
                 logging.info(f"RESPONSE: {llm_response}")
                 if llm_response:
                     audio_queue.put(llm_response)
+                    
+            
+            transcription_output = transcription_queue.get()
+            if transcription_queue.qsize() != 0:
+                continue
+            
+            # if transcription_output["uid"] not in conversation_history:
+            #     conversation_history[transcription_output["uid"]] = []
+
+            prompt = transcription_output['prompt'].strip()
+                                
+            # if prompt is same but EOS is True, we need that to send outputs to websockets
+            if self.last_prompt == prompt:
+                if self.last_output is not None and transcription_output["eos"]:
+                    self.eos = transcription_output["eos"]
+                    llm_queue.put({
+                        "uid": transcription_output["uid"],
+                        "llm_output": self.last_output,
+                        "eos": self.eos,
+                        "latency": self.infer_time
+                    })
+                    audio_queue.put({"llm_output": self.last_output, "eos": self.eos})
+                    # conversation_history[transcription_output["uid"]].append(
+                    #     (transcription_output['prompt'].strip(), self.last_output[0].strip())
+                    # )
+                    continue
                     
