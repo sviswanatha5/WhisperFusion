@@ -11,6 +11,7 @@ class CustomLLMAPI:
         self.conv_id = ''
         self.new_conv_url = self.api_url + 'new_conversation?user_id='
         self.completion_url = self.api_url + 'completion'
+        self.last_prompt = ""
 
     def query(self, message):
         if not self.conv_id:
@@ -38,39 +39,40 @@ class CustomLLMAPI:
 
 
     def run(self, transcription_queue, audio_queue, llm_queue):
+        
+        conversation_history = {}
         while True:
-            transcription_text = transcription_queue.get()
-            logging.info(f"Q: {transcription_queue}")
-            if transcription_text:
-                logging.info(f"TEXt: {transcription_text}")
-                llm_response = self.process_transcription(transcription_text)
-                logging.info(f"RESPONSE: {llm_response}")
-                if llm_response:
-                    audio_queue.put(llm_response)
+            # transcription_text = transcription_queue.get()
+            # logging.info(f"Q: {transcription_queue}")
+            # if transcription_text:
+            #     logging.info(f"TEXt: {transcription_text}")
+            #     llm_response = self.process_transcription(transcription_text)
+            #     logging.info(f"RESPONSE: {llm_response}")
+            #     if llm_response:
+            #         audio_queue.put(llm_response)
                     
             
             transcription_output = transcription_queue.get()
             if transcription_queue.qsize() != 0:
                 continue
             
-            # if transcription_output["uid"] not in conversation_history:
-            #     conversation_history[transcription_output["uid"]] = []
+            if transcription_output["uid"] not in conversation_history:
+                conversation_history[transcription_output["uid"]] = []
+            
+            self.last_prompt = prompt
+        
 
             prompt = transcription_output['prompt'].strip()
                                 
             # if prompt is same but EOS is True, we need that to send outputs to websockets
-            if self.last_prompt == prompt:
-                if self.last_output is not None and transcription_output["eos"]:
-                    self.eos = transcription_output["eos"]
-                    llm_queue.put({
-                        "uid": transcription_output["uid"],
-                        "llm_output": self.last_output,
-                        "eos": self.eos,
-                        "latency": self.infer_time
-                    })
-                    audio_queue.put({"llm_output": self.last_output, "eos": self.eos})
-                    # conversation_history[transcription_output["uid"]].append(
-                    #     (transcription_output['prompt'].strip(), self.last_output[0].strip())
-                    # )
-                    continue
+            if self.last_prompt == prompt and transcription_output["eos"]:
+                self.eos = transcription_output["eos"]
+                llm_response = self.process_transcription(transcription_output)
+                audio_queue.put({"llm_output": llm_response, "eos": self.eos})
+                self.last_prompt = ""
+                
+                # conversation_history[transcription_output["uid"]].append(
+                #     (transcription_output['prompt'].strip(), self.last_output[0].strip())
+                # )
+                continue
                     
