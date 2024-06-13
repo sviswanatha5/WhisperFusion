@@ -133,39 +133,40 @@ class TranscriptionServer:
         no_voice_activity_chunks = 0
         print()
         while True:
-            with lock:
+            # with lock:
+            try:
+                frame_data = websocket.recv()
+                frame_np = np.frombuffer(frame_data, dtype=np.float32)
+
+                # VAD
                 try:
-                    frame_data = websocket.recv()
-                    frame_np = np.frombuffer(frame_data, dtype=np.float32)
+                    speech_prob = self.vad_model(torch.from_numpy(frame_np.copy()), self.RATE).item()
+                    if speech_prob < self.vad_threshold:
+                        no_voice_activity_chunks += 1
+                        if no_voice_activity_chunks > 3:
+                            if not self.clients[websocket].eos:
+                                self.clients[websocket].set_eos(True)
+                            time.sleep(0.1)    # EOS stop receiving frames for a 100ms(to send output to LLM.)
+                            # wait here
+                        continue
+                    no_voice_activity_chunks = 0
+                    self.clients[websocket].set_eos(False)
 
-                    # VAD
-                    try:
-                        speech_prob = self.vad_model(torch.from_numpy(frame_np.copy()), self.RATE).item()
-                        if speech_prob < self.vad_threshold:
-                            no_voice_activity_chunks += 1
-                            if no_voice_activity_chunks > 3:
-                                if not self.clients[websocket].eos:
-                                    self.clients[websocket].set_eos(True)
-                                time.sleep(0.1)    # EOS stop receiving frames for a 100ms(to send output to LLM.)
-                            continue
-                        no_voice_activity_chunks = 0
-                        self.clients[websocket].set_eos(False)
+                except Exception as e:
+                    logging.error(e)
+                    return
+                self.clients[websocket].add_frames(frame_np)
 
-                    except Exception as e:
-                        logging.error(e)
-                        return
-                    self.clients[websocket].add_frames(frame_np)
-
-                    elapsed_time = time.time() - self.clients_start_time[websocket]
-                    if elapsed_time >= self.max_connection_time:
-                        self.clients[websocket].disconnect()
-                        logging.warning(f"{self.clients[websocket]} Client disconnected due to overtime.")
-                        self.clients[websocket].cleanup()
-                        self.clients.pop(websocket)
-                        self.clients_start_time.pop(websocket)
-                        websocket.close()
-                        del websocket
-                        break
+                elapsed_time = time.time() - self.clients_start_time[websocket]
+                if elapsed_time >= self.max_connection_time:
+                    self.clients[websocket].disconnect()
+                    logging.warning(f"{self.clients[websocket]} Client disconnected due to overtime.")
+                    self.clients[websocket].cleanup()
+                    self.clients.pop(websocket)
+                    self.clients_start_time.pop(websocket)
+                    websocket.close()
+                    del websocket
+                    break
 
                 except Exception as e:
                     logging.error(e)

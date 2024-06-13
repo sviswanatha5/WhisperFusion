@@ -7,7 +7,7 @@ class CustomLLMAPI:
     def __init__(self, api_url, api_key, user_id):
         self.api_url = api_url
         self.api_key = api_key
-        self.user_id = user_id
+        self.user_id = 'larry'
         self.headers = {'Authorization': 'Bearer ' + self.api_key}
         self.conv_id = ''
         self.new_conv_url = self.api_url + 'new_conversation?user_id='
@@ -66,7 +66,7 @@ class CustomLLMAPI:
                                 
             # if prompt is same but EOS is True, we need that to send outputs to websockets
             if self.last_prompt == prompt and transcription_output["eos"]:
-                lock.acquire()
+                # lock.acquire()
                 self.eos = transcription_output["eos"]
                 start = time.time()
                 llm_response = self.process_transcription(transcription_output['prompt'])
@@ -82,7 +82,7 @@ class CustomLLMAPI:
                         "latency": self.infer_time
                     })
                 self.last_prompt = ""
-                lock.release()
+                # lock.release()
                 continue
                 
                 # conversation_history[transcription_output["uid"]].append(
