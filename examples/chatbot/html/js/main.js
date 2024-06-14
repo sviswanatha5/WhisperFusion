@@ -337,4 +337,29 @@ document.addEventListener('DOMContentLoaded', function() {
     if (urlParams.has('name')) {
         you_name = urlParams.get('name')
     }
- }, false);
+}, false);
+ 
+function startRecording() {
+  // Your start recording logic here
+  console.log('Recording started');
+}
+
+function stopRecording() {
+  // Your stop recording logic here
+  console.log('Recording stopped');
+}
+
+
+function toggleRecording() {
+  const micButton = document.getElementById('mic-button');
+  const micIcon = document.getElementById('mic-icon');
+  if (micButton.classList.contains('active')) {
+    micButton.classList.remove('active');
+    stopRecording();
+    micIcon.src = 'img/microphone-white.png';
+  } else {
+    micButton.classList.add('active');
+    startRecording();
+    micIcon.src = 'img/microphone-red.png';
+  }
+}
