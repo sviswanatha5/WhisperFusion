@@ -108,11 +108,12 @@ function stopRecording() {
 }
 
 function initWebSocket() {
+    let audio_playing = false; // Flag to track if audio is currently playing
+
+    // WebSocket for audio
     websocket_audio = new WebSocket(websocket_audio_uri);
     websocket_audio.binaryType = "arraybuffer";
 
-    websocket_audio.onopen = function() { }
-    websocket_audio.onclose = function(e) { }
     websocket_audio.onmessage = function(e) {
         available_audio_elements++;
         
@@ -129,69 +130,83 @@ function initWebSocket() {
         audio_source.connect(audioContext_tts.destination);
         audio_source.start();
 
+        audio_playing = true; // Set flag to true when audio starts playing
+
+        // Scroll to bottom of page
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 
+    // WebSocket for text messages
     websocket = new WebSocket(websocket_uri);
     websocket.binaryType = "arraybuffer";
 
     console.log("Websocket created.");
   
     websocket.onopen = function() {
-      console.log("Connected to server.");
+        console.log("Connected to server.");
       
-      websocket.send(JSON.stringify({
-        uid: generateUUID(),
-        multilingual: false,
-        language: "en",
-        task: "transcribe"
-      }));
+        websocket.send(JSON.stringify({
+            uid: generateUUID(),
+            multilingual: false,
+            language: "en",
+            task: "transcribe"
+        }));
     }
     
     websocket.onclose = function(e) {
-      console.log("Connection closed (" + e.code + ").");
+        console.log("Connection closed (" + e.code + ").");
     }
     
     websocket.onmessage = function(e) {
-      var data = JSON.parse(e.data);
+        var data = JSON.parse(e.data);
 
-      if ("message" in data) {
-        if (data["message"] == "SERVER_READY") {
-            server_state = 1;
+        // Check if audio is playing and stop it if true
+        if (audio_playing) {
+            audio_source.stop();
+            audio_playing = false; // Reset the flag after stopping audio
         }
-      } else if ("segments" in data) {
-        if (new_transcription_element_state) {
-            available_transcription_elements = available_transcription_elements + 1;
 
-            var img_src = "0.png";
-            if (you_name.toLowerCase() == "marcus") {
-                you_name = "Marcus";
-                img_src = "0.png";
-            } else if (you_name.toLowerCase() == "vineet") {
-                you_name = "Vineet";
-                img_src = "1.png";
-            } else if (you_name.toLowerCase() == "jakub") {
-                you_name = "Jakub";
-                img_src = "2.png";
+        // Your existing message handling logic here...
+        if ("message" in data) {
+            // Handle messages from users
+        } else if ("segments" in data) {
+            // Handle transcription segments
+
+            if (new_transcription_element_state) {
+                available_transcription_elements++;
+
+                var img_src = "0.png";
+                if (you_name.toLowerCase() == "marcus") {
+                    you_name = "Marcus";
+                    img_src = "0.png";
+                } else if (you_name.toLowerCase() == "vineet") {
+                    you_name = "Vineet";
+                    img_src = "1.png";
+                } else if (you_name.toLowerCase() == "jakub") {
+                    you_name = "Jakub";
+                    img_src = "2.png";
+                }
+
+                new_transcription_element(you_name, img_src);
+                new_text_element("<p>" +  data["segments"][0].text + "</p>", "transcription-" + available_transcription_elements);
+                new_transcription_element_state = false;
             }
+            document.getElementById("transcription-" + available_transcription_elements).innerHTML = "<p>" + data["segments"][0].text + "</p>"; 
 
-            new_transcription_element(you_name, img_src);
-            new_text_element("<p>" +  data["segments"][0].text + "</p>", "transcription-" + available_transcription_elements);
-            new_transcription_element_state = false;
-        }
-        document.getElementById("transcription-" + available_transcription_elements).innerHTML = "<p>" + data["segments"][0].text + "</p>"; 
-
-        if (data["eos"] == true) {
-            new_transcription_element_state = true;
-        }
-      } else if ("llm_output" in data) {
+            if (data["eos"] == true) {
+                new_transcription_element_state = true;
+            }
+        } else if ("llm_output" in data) {
+            // Handle LLM output
             new_transcription_element("Phi-2", "Phi.svg");
             new_text_element("<p>" +  data["llm_output"][0] + "</p>", "llm-" + available_transcription_elements);
-      }
+        }
 
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        // Scroll to bottom of page
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 }
+
 
 function new_transcription_element(speaker_name, speaker_avatar) {
     var avatar_container = document.createElement("div");
