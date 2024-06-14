@@ -340,4 +340,13 @@ document.addEventListener('DOMContentLoaded', function() {
 }, false);
 
 
+let isRecording = false;
 
+function toggleRecording() {
+  if (isRecording) {
+    stopRecording();
+  } else {
+    startRecording();
+  }
+  isRecording = !isRecording;
+}
