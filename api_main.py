@@ -32,10 +32,10 @@ def parse_arguments():
                         type=str,
                         required=True,
                         help='RAGflow API Key')
-    parser.add_argument('--user_id',
-                        type=str,
-                        required=True,
-                        help='User ID for RAGflow API')
+    # parser.add_argument('--user_id',
+    #                     type=str,
+    #                     required=True,
+    #                     help='User ID for RAGflow API')
     return parser.parse_args()
 
 if __name__ == "__main__":
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     )
     whisper_process.start()
 
-    custom_llm_api = CustomLLMAPI(api_url=args.api_url, api_key=args.api_key, user_id=args.user_id)    
+    custom_llm_api = CustomLLMAPI(api_url=args.api_url, api_key=args.api_key)    
 
     llm_process = multiprocessing.Process(
         target=custom_llm_api.run,

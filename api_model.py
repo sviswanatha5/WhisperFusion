@@ -4,10 +4,9 @@ import time
 logging.basicConfig(level = logging.INFO)
 
 class CustomLLMAPI:
-    def __init__(self, api_url, api_key, user_id):
+    def __init__(self, api_url, api_key):
         self.api_url = api_url
         self.api_key = api_key
-        self.user_id = 'larry'
         self.headers = {'Authorization': 'Bearer ' + self.api_key}
         self.conv_id = ''
         self.new_conv_url = self.api_url + 'new_conversation?user_id='
@@ -17,7 +16,7 @@ class CustomLLMAPI:
 
     def query(self, message):
         if not self.conv_id:
-            r = requests.get(self.new_conv_url + self.user_id, headers=self.headers)
+            r = requests.get(self.new_conv_url , headers=self.headers)
             self.conv_id = r.json()['data']['id']
             logging.info(r.json()['data'])
         post_data = {
