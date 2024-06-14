@@ -338,16 +338,6 @@ document.addEventListener('DOMContentLoaded', function() {
         you_name = urlParams.get('name')
     }
 }, false);
- 
-function startRecording() {
-  // Your start recording logic here
-  console.log('Recording started');
-}
-
-function stopRecording() {
-  // Your stop recording logic here
-  console.log('Recording stopped');
-}
 
 
 function toggleRecording() {

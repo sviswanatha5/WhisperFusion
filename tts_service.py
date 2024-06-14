@@ -13,7 +13,7 @@ class WhisperSpeechTTS:
         pass
     
     def initialize_model(self):
-        self.pipe = Pipeline(s2a_ref='collabora/whisperspeech:s2a-q4-tiny-en+pl.model', torch_compile=True)
+        self.pipe = Pipeline(s2a_ref='collabora/whisperspeech:s2a-q4-hq-fast-en+pl.model', torch_compile=True)
         self.last_llm_response = None
 
     def run(self, host, port, audio_queue=None, should_send_server_ready=None):
