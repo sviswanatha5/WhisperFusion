@@ -108,6 +108,7 @@ function stopRecording() {
 }
 
 function initWebSocket() {
+    let audio_source = null; // Variable to hold the current audio source
     let audio_playing = false; // Flag to track if audio is currently playing
 
     // WebSocket for audio
@@ -161,7 +162,7 @@ function initWebSocket() {
         var data = JSON.parse(e.data);
 
         // Check if audio is playing and stop it if true
-        if (audio_playing) {
+        if (audio_playing && audio_source) {
             audio_source.stop();
             audio_playing = false; // Reset the flag after stopping audio
         }
@@ -169,6 +170,14 @@ function initWebSocket() {
         // Your existing message handling logic here...
         if ("message" in data) {
             // Handle messages from users
+            if (data["message"] === "USER_SPEAKING") {
+                // Handle user speaking event here
+                console.log("User is speaking, stopping audio playback.");
+                if (audio_playing && audio_source) {
+                    audio_source.stop();
+                    audio_playing = false; // Reset the flag after stopping audio
+                }
+            }
         } else if ("segments" in data) {
             // Handle transcription segments
 
