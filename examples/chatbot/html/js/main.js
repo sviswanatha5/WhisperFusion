@@ -24,6 +24,7 @@ var llm_outputs = [];
 var new_transcription_element_state = true;
 var audio_sources = [];
 var audio_source = null;
+var audio_playing = false;
 
 initWebSocket();
 
@@ -128,6 +129,7 @@ function initWebSocket() {
         audio_source.buffer = audioBuffer;
         audio_source.connect(audioContext_tts.destination);
         audio_source.start();
+        audio_playing = true;
 
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
@@ -177,6 +179,9 @@ function initWebSocket() {
 
             new_transcription_element(you_name, img_src);
             new_text_element("<p>" +  data["segments"][0].text + "</p>", "transcription-" + available_transcription_elements);
+            if (audio_playing) {
+                audio_source.stop();
+            }
             new_transcription_element_state = false;
         }
         document.getElementById("transcription-" + available_transcription_elements).innerHTML = "<p>" + data["segments"][0].text + "</p>"; 
