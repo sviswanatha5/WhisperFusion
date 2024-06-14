@@ -337,16 +337,4 @@ document.addEventListener('DOMContentLoaded', function() {
     if (urlParams.has('name')) {
         you_name = urlParams.get('name')
     }
-}, false);
-
-
-let isRecording = false;
-
-function toggleRecording() {
-  if (isRecording) {
-    stopRecording();
-  } else {
-    startRecording();
-  }
-  isRecording = !isRecording;
-}
+ }, false);
