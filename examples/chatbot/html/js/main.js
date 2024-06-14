@@ -92,10 +92,12 @@ const startRecording = async () => {
 
     audioContext_tts = new AudioContext({ sampleRate: 24000 });
 
-    document.getElementById("recording-stop-btn").style.display = "block";
-    document.getElementById("recording-dot").style.display = "block";
-    document.getElementById("recording-line").style.display = "block";
-    document.getElementById("recording-time").style.display = "block";
+    document.getElementById("toggle-recording-btn").style.display = "block";
+
+    // document.getElementById("recording-stop-btn").style.display = "block";
+    // document.getElementById("recording-dot").style.display = "block";
+    // document.getElementById("recording-line").style.display = "block";
+    // document.getElementById("recording-time").style.display = "block";
     
     intervalFunction = setInterval(recording_timer, 1000);
 
