@@ -10,7 +10,7 @@ cd /root/WhisperFusion
 if [ "$1" != "mistral" ]; then
   exec python3 api_main.py --phi \
                   --whisper_tensorrt_path /root/scratch-space/models/whisper_small_en \
-                  --api_url "http://12.1.52.172:8001/generate" \
+                  --api_url "http://12.1.52.172:8002/generate" \
                   --api_key "ragflow-A2YmVmN2EwMjZlNTExZWZiY2E3MDI0Mm" \
                   
                   

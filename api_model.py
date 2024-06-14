@@ -19,9 +19,10 @@ class CustomLLMAPI:
         self.infer_time = 0
 
     def query(self, message):
+        length_string = " Please limit the response to 50 words."
         post_data = {
             "mode": "LONG_CTX",
-            "prompt": message,
+            "prompt": message + length_string,
             "top_p": 0.8,
             "top_k": 10,
             "temperature": 0.95,
