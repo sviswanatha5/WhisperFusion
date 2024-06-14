@@ -435,27 +435,3 @@ summary {
 .audio-container {
 margin-top:14px;
 }
-
-
-
-.mic-button {
-  width: 60px;
-  height: 60px;
-  background-color: #5C2983;
-  border: none;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.mic-button img {
-  width: 30px;
-  height: 30px;
-}
-
-.mic-button.active {
-  background-color: red;
-}

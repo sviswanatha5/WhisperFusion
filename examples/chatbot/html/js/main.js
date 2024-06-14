@@ -340,16 +340,4 @@ document.addEventListener('DOMContentLoaded', function() {
 }, false);
 
 
-function toggleRecording() {
-  const micButton = document.getElementById('mic-button');
-  const micIcon = document.getElementById('mic-icon');
-  if (micButton.classList.contains('active')) {
-    micButton.classList.remove('active');
-    stopRecording();
-    micIcon.src = 'img/microphone-white.png';
-  } else {
-    micButton.classList.add('active');
-    startRecording();
-    micIcon.src = 'img/microphone-red.png';
-  }
-}
+

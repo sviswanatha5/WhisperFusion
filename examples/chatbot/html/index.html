@@ -25,7 +25,10 @@
     <br><br>
     <div id="control-container" class="control-container" style="width:500px;height:50px;background-color: #5C2983;border-radius: 20px;">
       <div style="margin-top:10px;padding-left:20px">
-        <img class="button-item" onclick="toggleRecording()"  onmouseleave='this.src="img/microphone.png"'  onmouseover='this.src="img/microphone-hover.png"' style="width:20px;padding-top:4px" src="img/microphone-white.png" \>
+        <img class="button-item" onclick="startRecording()"  onmouseleave='this.src="img/microphone.png"'  onmouseover='this.src="img/microphone-hover.png"' style="width:20px;padding-top:4px" src="img/microphone-white.png" \>
+      </div>
+      <div style="margin-top:10px">
+        <img class="button-item" onclick="stopRecording()" id="recording-stop-btn" style="width:20px;display:none;padding-top:4px" src="img/stop.png" \>
       </div>
       <div>
         <div id="instructions-text" style="width:440px;height:40px;border-radius: 14px;color:white;padding:4px;font-size:14px;text-align:center;padding-top:15px">Click the microphone to start</div>
