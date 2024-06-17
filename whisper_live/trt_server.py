@@ -95,7 +95,7 @@ class TranscriptionServer:
             Exception: If there is an error during the audio frame processing.
         """
         self.vad_model = VoiceActivityDetection()
-        self.vad_threshold = 1.0
+        self.vad_threshold = 0.75
 
         logging.info("[Whisper INFO:] New client connected")
         options = websocket.recv()
@@ -141,6 +141,7 @@ class TranscriptionServer:
                 # VAD
                 try:
                     speech_prob = self.vad_model(torch.from_numpy(frame_np.copy()), self.RATE).item()
+                    logging.info(f"speech prob: {speech_prob}")
                     if speech_prob < self.vad_threshold:
                         no_voice_activity_chunks += 1
                         if no_voice_activity_chunks > 3:
