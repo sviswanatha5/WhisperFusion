@@ -95,7 +95,7 @@ class TranscriptionServer:
             Exception: If there is an error during the audio frame processing.
         """
         self.vad_model = VoiceActivityDetection()
-        self.vad_threshold = 0.5
+        self.vad_threshold = 1.0
 
         logging.info("[Whisper INFO:] New client connected")
         options = websocket.recv()
@@ -133,7 +133,7 @@ class TranscriptionServer:
         no_voice_activity_chunks = 0
         print()
         while True:
-            # with lock:
+            # spinlock
             try:
                 frame_data = websocket.recv()
                 frame_np = np.frombuffer(frame_data, dtype=np.float32)
@@ -147,6 +147,7 @@ class TranscriptionServer:
                             if not self.clients[websocket].eos:
                                 self.clients[websocket].set_eos(True)
                             time.sleep(0.1)    # EOS stop receiving frames for a 100ms(to send output to LLM.)
+                            # acquire lock
                             # wait here
                         continue
                     no_voice_activity_chunks = 0
