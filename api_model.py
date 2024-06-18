@@ -6,6 +6,19 @@ import time
 import json
 logging.basicConfig(level=logging.INFO)
 
+class ConversationHistory:
+    def __init__(self):
+        self.history = []
+
+    def add_to_history(self, speaker, message):
+        self.history.append({"speaker": speaker, "message": message})
+
+    def get_history(self):
+        return "\n".join([f"{entry['speaker']}:{entry['message']}" for entry in self.history])
+    
+    def clear_history(self):
+        self.history = []
+
 class CustomLLMAPI:
     def __init__(self, api_url, api_key):
         self.api_url = api_url
@@ -21,13 +34,13 @@ class CustomLLMAPI:
     def query(self, message):
         length_string = " Please limit the response to 50 words."
         post_data = {
-            "mode": "LONG_CTX",
+            "mode": "test",
             "prompt": message + length_string,
-            "top_p": 0.8,
+            "top_p": 0.9,
             "top_k": 10,
-            "temperature": 0.95,
+            "temperature": 0.2,
             "repetition_penalty": 1.0,
-            "max_new_tokens": 2048
+            "max_new_tokens": 500
         }
         logging.info(f"Sending request to: {self.api_url}")
         logging.info(f"Post data: {post_data}")
