@@ -105,6 +105,8 @@ class TranscriptionServer:
         )
 
         self.clients[websocket] = client
+        logging.info(f"Websocket: {websocket}")
+        logging.info(f"Client_uid: {options["uid"]}")
         self.clients_start_time[websocket] = time.time()
 
         while True:
