@@ -70,8 +70,8 @@ class CustomLLMAPI:
             if transcription_queue.qsize() != 0:
                 continue
             
-            if transcription_output["uid"] not in self.conversation_history:
-                self.conversation_history.clear_history()
+            # if transcription_output["uid"] not in self.conversation_history:
+            #     self.conversation_history.clear_history()
             
             prompt = transcription_output['prompt'].strip()
             logging.info(f"PROMPT: {prompt}")
