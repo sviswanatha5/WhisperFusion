@@ -2,6 +2,8 @@ import requests
 import logging
 import time
 import json
+from queue import Queue
+
 logging.basicConfig(level=logging.INFO)
 
 class ConversationHistory:
@@ -28,9 +30,9 @@ class CustomLLMAPI:
         self.conv_id = ''
         self.last_prompt = ""
         self.infer_time = 0
+        self.eos = False
 
     def query(self, message):
-        length_string = " Please limit the response to 50 words."
         post_data = {
             "mode": "test",
             "prompt": message,
@@ -84,7 +86,6 @@ class CustomLLMAPI:
                 llm_response = self.process_transcription(transcription_output['prompt'])
                 logging.info(f"RESPONSE: {llm_response}")
                 self.infer_time = time.time() - start
-                logging.info(f"[API] Response in {self.infer_time} seconds")
                 test = []
                 test.append(llm_response)
                 audio_queue.put({"llm_output": test, "eos": self.eos})
@@ -94,7 +95,9 @@ class CustomLLMAPI:
                         "eos": self.eos,
                         "latency": self.infer_time
                     })
-                self.last_prompt = ""
+                self.last_prompt = ""  # Reset last prompt after processing
+                self.eos = False  # Reset eos after processing
                 continue
             
             self.last_prompt = prompt
+            self.eos = transcription_output["eos"]
