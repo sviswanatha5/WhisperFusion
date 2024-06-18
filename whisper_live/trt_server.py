@@ -141,10 +141,9 @@ class TranscriptionServer:
                 # VAD
                 try:
                     speech_prob = self.vad_model(torch.from_numpy(frame_np.copy()), self.RATE).item()
-                    logging.info(f"speech prob: {speech_prob}")
                     if speech_prob < self.vad_threshold:
                         no_voice_activity_chunks += 1
-                        if no_voice_activity_chunks > 3:
+                        if no_voice_activity_chunks > 5:
                             if not self.clients[websocket].eos:
                                 self.clients[websocket].set_eos(True)
                             time.sleep(0.1)    # EOS stop receiving frames for a 100ms(to send output to LLM.)
