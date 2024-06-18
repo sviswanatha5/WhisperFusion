@@ -28,6 +28,7 @@ class CustomLLMAPI:
         self.api_url = api_url
         self.conversation_history = ConversationHistory()
         self.api_key = api_key
+        self.last_prompt = ""
 
     def query(self, messages: List[Dict[str, Any]]):
         formatted_prompt = self.conversation_history.get_formatted_history() + messages[-1]['message']
