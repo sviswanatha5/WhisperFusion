@@ -26,12 +26,13 @@ class ConversationHistory:
 class CustomLLMAPI:
     def __init__(self, api_url, api_key):
         self.api_url = api_url
-        self.conversation_history = ConversationHistory()
         self.api_key = api_key
         self.last_prompt = ""
 
-    def query(self, messages: List[Dict[str, Any]]):
+    def query(self, messages: List[Dict[str, Any]], conversation_history: ConversationHistory):
+        
         formatted_prompt = messages[-1]['message']
+        conversation_history.get_formatted_history(formatted_prompt)
         post_data = {
             "content": formatted_prompt,
             "top_p": 0.8,
@@ -57,37 +58,38 @@ class CustomLLMAPI:
         else:
             return "Error: " + response.text
 
-    def process_transcription(self, transcription_text):
+    def process_transcription(self, transcription_text, conversation_history: ConversationHistory):
         try:
-            llm_response = self.query([{"speaker": "user", "message": transcription_text}])
+            llm_response = self.query([{"speaker": "user", "message": transcription_text}], conversation_history)
             return llm_response
         except Exception as e:
             logging.error(f"Error querying custom LLM API: {e}")
             return None
 
-    def run(self, transcription_queue, audio_queue, llm_queue, lock):
+    def run(self, transcription_queue, audio_queue, llm_queue, conversation_history):
         while True:
             transcription_output = transcription_queue.get()
             if transcription_queue.qsize() != 0:
                 continue
             
-            # if transcription_output["uid"] not in self.conversation_history:
-            #     self.conversation_history.clear_history()
-            
             prompt = transcription_output['prompt'].strip()
+            user = transcription_output['uid']
             logging.info(f"PROMPT: {prompt}")
-                                
+
+            if user not in conversation_history:
+                conversation_history[user] = ConversationHistory()
+                
             if self.last_prompt == prompt and transcription_output["eos"]:
                 self.eos = transcription_output["eos"]
                 start = time.time()
-                llm_response = self.process_transcription(prompt)
+                conversation_history[user].add_to_history("user", prompt)
+                llm_response = self.process_transcription(prompt, conversation_history[user])
                 logging.info(f"RESPONSE: {llm_response}")
                 self.infer_time = time.time() - start
-                self.conversation_history.add_to_history("user", prompt)
-                self.conversation_history.add_to_history("assistant", llm_response)
+                conversation_history[user].add_to_history("assistant", llm_response)
                 audio_queue.put({"llm_output": llm_response, "eos": self.eos})
                 llm_queue.put({
-                        "uid": transcription_output["uid"],
+                        "uid": user,
                         "llm_output": llm_response,
                         "eos": self.eos,
                         "latency": self.infer_time

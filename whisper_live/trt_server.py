@@ -73,7 +73,7 @@ class TranscriptionServer:
 
         return wait_time / 60
 
-    def recv_audio(self, websocket, transcription_queue=None, llm_queue=None, whisper_tensorrt_path=None, should_send_server_ready=None, lock=None):
+    def recv_audio(self, websocket, transcription_queue=None, llm_queue=None, whisper_tensorrt_path=None, should_send_server_ready=None, conversation_history=None):
         """
         Receive audio chunks from a client in an infinite loop.
         
@@ -162,6 +162,8 @@ class TranscriptionServer:
 
                 elapsed_time = time.time() - self.clients_start_time[websocket]
                 if elapsed_time >= self.max_connection_time:
+                    if conversation_history[self.clients[websocket].client_uid]:
+                        del conversation_history[self.clients[websocket].client_uid]
                     self.clients[websocket].disconnect()
                     logging.warning(f"{self.clients[websocket]} Client disconnected due to overtime.")
                     self.clients[websocket].cleanup()
@@ -173,6 +175,8 @@ class TranscriptionServer:
 
             except Exception as e:
                 logging.error(e)
+                if conversation_history[self.clients[websocket].client_uid]:
+                    del conversation_history[self.clients[websocket].client_uid]
                 self.clients[websocket].cleanup()
                 self.clients.pop(websocket)
                 self.clients_start_time.pop(websocket)
