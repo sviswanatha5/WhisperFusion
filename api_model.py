@@ -33,7 +33,7 @@ class CustomLLMAPI:
         length_string = " Please limit the response to 50 words."
         post_data = {
             "mode": "test",
-            "prompt": message + length_string,
+            "prompt": message,
             "top_p": 0.9,
             "top_k": 10,
             "temperature": 0.2,
@@ -84,6 +84,7 @@ class CustomLLMAPI:
                 llm_response = self.process_transcription(transcription_output['prompt'])
                 logging.info(f"RESPONSE: {llm_response}")
                 self.infer_time = time.time() - start
+                logging.info(f"[API] Response in {self.infer_time} seconds")
                 test = []
                 test.append(llm_response)
                 audio_queue.put({"llm_output": test, "eos": self.eos})
