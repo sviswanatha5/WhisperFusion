@@ -50,7 +50,7 @@ class WhisperSpeechTTS:
                 audio_queue.put(llm_response)
                 break
             
-            llm_output = llm_response["llm_output"][0]
+            llm_output = llm_response["llm_output"]
             logging.info(f"[WhisperSpeech INFO:] LLM Response: {llm_output} \n\n")
             self.eos = llm_response["eos"]
 
