@@ -32,11 +32,14 @@ class CustomLLMAPI:
         self.last_prompt = ""
         self.infer_time = 0
         self.eos = False
+        self.history = ConversationHistory()
 
     def query(self, message):
+        self.history.add_to_history("User", message)
+        input = self.history.get_history()
         post_data = {
             "mode": "test",
-            "prompt": message,
+            "prompt": input,
             "top_p": 0.9,
             "top_k": 10,
             "temperature": 0.2,
@@ -85,6 +88,7 @@ class CustomLLMAPI:
                 self.eos = transcription_output["eos"]
                 start = time.time()
                 llm_response = self.process_transcription(transcription_output['prompt'])
+                self.history.add_to_history("Assistant", llm_response)
                 logging.info(f"RESPONSE: {llm_response}")
                 self.infer_time = time.time() - start
                 test = []
