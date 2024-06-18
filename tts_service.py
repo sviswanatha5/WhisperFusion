@@ -51,7 +51,7 @@ class WhisperSpeechTTS:
                 break
             
             llm_output = llm_response["llm_output"][0]
-            logging.info(f"[WhisperSpeech INFO:] LLM Response: {llm_response} \n\n")
+            logging.info(f"[WhisperSpeech INFO:] LLM Response: {llm_response["llm_output"][0]} \n\n")
             self.eos = llm_response["eos"]
 
             def should_abort():
