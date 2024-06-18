@@ -32,9 +32,9 @@ class CustomLLMAPI:
     def query(self, messages: List[Dict[str, Any]], conversation_history: ConversationHistory):
         
         formatted_prompt = messages[-1]['message']
-        conversation_history.get_formatted_history(formatted_prompt)
+        history_prompt = conversation_history.get_formatted_history(formatted_prompt)
         post_data = {
-            "content": formatted_prompt,
+            "content": history_prompt,
             "top_p": 0.8,
             "top_k": 10,
             "temperature": 0.95,
