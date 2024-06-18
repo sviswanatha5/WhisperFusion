@@ -16,7 +16,7 @@ class ConversationHistory:
     def get_history(self):
         text = "\n".join([f"{entry['speaker']}:{entry['message']}" for entry in self.history])
         text += "\nAssistant: "
-        return 
+        return text
     
     def clear_history(self):
         self.history = []
