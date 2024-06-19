@@ -7,13 +7,15 @@ from tqdm import tqdm
 from websockets.sync.server import serve
 from whisperspeech.pipeline import Pipeline
 
+import os
 
 class WhisperSpeechTTS:
     def __init__(self):
         pass
     
     def initialize_model(self):
-        self.pipe = Pipeline(s2a_ref='collabora/whisperspeech:s2a-q4-small-en+pl.model', torch_compile=True, device="cuda:0,1")
+        os.environ["CUDA_VISIBLE_DEVICES"]="0"
+        self.pipe = Pipeline(s2a_ref='collabora/whisperspeech:s2a-q4-small-en+pl.model', torch_compile=True, device="cuda")
         self.last_llm_response = None
 
     def run(self, host, port, audio_queue=None, should_send_server_ready=None):
