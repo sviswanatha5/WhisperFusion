@@ -27,7 +27,7 @@ class WhisperSpeechTTS:
         # Wrap the model with DataParallel for multi-GPU support
         if torch.cuda.device_count() > 1:
             logging.info(f"Using {torch.cuda.device_count()} GPUs")
-            self.pipe.model = nn.DataParallel(self.pipe.model)
+            self.pipe.s2a = nn.DataParallel(self.pipe.s2a)
 
         self.pipe.model.to('cuda')  # Ensure the model is on the GPU
         self.last_llm_response = None
