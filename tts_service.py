@@ -1,61 +1,41 @@
 import functools
 import time
 import logging
-import os
+logging.basicConfig(level = logging.INFO)
 from tqdm import tqdm
 from websockets.sync.server import serve
 from whisperspeech.pipeline import Pipeline
-import torch
-import torch.nn as nn
-
-logging.basicConfig(level=logging.INFO)
-
 class WhisperSpeechTTS:
     def __init__(self):
         pass
-    
+
     def initialize_model(self):
-        os.environ["CUDA_VISIBLE_DEVICES"]="0,1"  # Set this to the number of GPUs you have
-
-        # Initialize the Pipeline
-        self.pipe = Pipeline(
-            s2a_ref='collabora/whisperspeech:s2a-q4-small-en+pl.model', 
-            torch_compile=True, 
-            device="cuda"
-        )
-
-        # Wrap the model with DataParallel for multi-GPU support
-        if torch.cuda.device_count() > 1:
-            logging.info(f"Using {torch.cuda.device_count()} GPUs")
-            self.pipe.s2a = nn.DataParallel(self.pipe.s2a, [0,1])
-
-        #self.pipe.s2a.to('cuda')  # Ensure the model is on the GPU
+        self.pipe = Pipeline(s2a_ref='collabora/whisperspeech:s2a-q4-small-en+pl.model', torch_compile=True, device="cuda:0,1")
         self.last_llm_response = None
 
     def run(self, host, port, audio_queue=None, should_send_server_ready=None):
         # initialize and warmup model
         self.initialize_model()
         logging.info("\n[WhisperSpeech INFO:] Warming up torch compile model. Please wait ...\n")
-        #for _ in tqdm(range(3), desc="Warming up"):
-            #self.pipe.module.generate("Hello, I am warming up.")
+        for _ in tqdm(range(3), desc="Warming up"):
+            self.pipe.generate("Hello, I am warming up.")
         logging.info("[WhisperSpeech INFO:] Warmed up Whisper Speech torch compile model. Connect to the WebGUI now.")
         should_send_server_ready.value = True
-
         with serve(
             functools.partial(self.start_whisperspeech_tts, audio_queue=audio_queue), 
             host, port
-        ) as server:
+            ) as server:
             server.serve_forever()
-
     def start_whisperspeech_tts(self, websocket, audio_queue=None):
         self.eos = False
         self.output_audio = None
-
         while True:
+        
+            
             llm_response = audio_queue.get()
             if audio_queue.qsize() != 0:
                 continue
-
+            
             # check if this websocket exists
             try:
                 websocket.ping()
@@ -63,14 +43,12 @@ class WhisperSpeechTTS:
                 del websocket
                 audio_queue.put(llm_response)
                 break
-
+            
             llm_output = llm_response["llm_output"]
             logging.info(f"[WhisperSpeech INFO:] LLM Response: {llm_output} \n\n")
             self.eos = llm_response["eos"]
-
             def should_abort():
                 if not audio_queue.empty(): raise TimeoutError()
-
             # only process if the output updated
             try:
                 if self.last_llm_response != llm_output.strip():
@@ -84,7 +62,6 @@ class WhisperSpeechTTS:
                 pass
             except AttributeError as e:
                 logging.error(f"[WhisperSpeech ERROR:] Received {llm_output} from API. Should not be None")
-
             if self.eos and self.output_audio is not None:
                 try:
                     websocket.send(self.output_audio.tobytes())
