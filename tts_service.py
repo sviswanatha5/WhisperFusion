@@ -21,7 +21,7 @@ class WhisperSpeechTTS:
         self.pipe = Pipeline(
             s2a_ref='collabora/whisperspeech:s2a-q4-small-en+pl.model', 
             torch_compile=True, 
-            device="cuda:0,1"
+            device="cuda"
         )
 
         # Wrap the model with DataParallel for multi-GPU support
