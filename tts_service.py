@@ -1,24 +1,36 @@
 import functools
 import time
 import logging
-logging.basicConfig(level = logging.INFO)
-
+import os
 from tqdm import tqdm
 from websockets.sync.server import serve
 from whisperspeech.pipeline import Pipeline
+import torch
+import torch.nn as nn
 
-
-import os
+logging.basicConfig(level=logging.INFO)
 
 class WhisperSpeechTTS:
     def __init__(self):
         pass
     
     def initialize_model(self):
-        os.environ["CUDA_VISIBLE_DEVICES"]="0,1"
-        self.pipe = Pipeline(s2a_ref='collabora/whisperspeech:s2a-q4-small-en+pl.model', torch_compile=True, device="cuda")
-        self.last_llm_response = None
+        os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3"  # Set this to the number of GPUs you have
 
+        # Initialize the Pipeline
+        self.pipe = Pipeline(
+            s2a_ref='collabora/whisperspeech:s2a-q4-small-en+pl.model', 
+            torch_compile=True, 
+            device="cuda"
+        )
+
+        # Wrap the model with DataParallel for multi-GPU support
+        if torch.cuda.device_count() > 1:
+            logging.info(f"Using {torch.cuda.device_count()} GPUs")
+            self.pipe.model = nn.DataParallel(self.pipe.model)
+
+        self.pipe.model.to('cuda')  # Ensure the model is on the GPU
+        self.last_llm_response = None
 
     def run(self, host, port, audio_queue=None, should_send_server_ready=None):
         # initialize and warmup model
@@ -32,7 +44,7 @@ class WhisperSpeechTTS:
         with serve(
             functools.partial(self.start_whisperspeech_tts, audio_queue=audio_queue), 
             host, port
-            ) as server:
+        ) as server:
             server.serve_forever()
 
     def start_whisperspeech_tts(self, websocket, audio_queue=None):
@@ -40,12 +52,10 @@ class WhisperSpeechTTS:
         self.output_audio = None
 
         while True:
-        
-            
             llm_response = audio_queue.get()
             if audio_queue.qsize() != 0:
                 continue
-            
+
             # check if this websocket exists
             try:
                 websocket.ping()
@@ -53,7 +63,7 @@ class WhisperSpeechTTS:
                 del websocket
                 audio_queue.put(llm_response)
                 break
-            
+
             llm_output = llm_response["llm_output"]
             logging.info(f"[WhisperSpeech INFO:] LLM Response: {llm_output} \n\n")
             self.eos = llm_response["eos"]
