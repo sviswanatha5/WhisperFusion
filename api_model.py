@@ -87,6 +87,7 @@ class CustomLLMAPI:
                     llm_response = "The service is currently not available"
                 logging.info(f"RESPONSE: {llm_response}")
                 self.infer_time = time.time() - start
+                logging.info(f"API INFERENCE TIME: {self.infer_time}")
                 conversation_history[user].add_to_history("assistant", llm_response)
                 audio_queue.put({"llm_output": llm_response, "eos": self.eos})
                 llm_queue.put({

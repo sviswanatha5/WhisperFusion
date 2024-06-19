@@ -128,6 +128,9 @@ function initWebSocket() {
         audio_source = audioContext_tts.createBufferSource();
         audio_source.buffer = audioBuffer;
         audio_source.connect(audioContext_tts.destination);
+        if (audio_playing) {
+            audio_source.stop()
+        }
         audio_source.start();
         audio_playing = true;
 
@@ -181,6 +184,7 @@ function initWebSocket() {
             new_text_element("<p>" +  data["segments"][0].text + "</p>", "transcription-" + available_transcription_elements);
             if (audio_playing) {
                 audio_source.stop();
+                audio_playing = false;
             }
             new_transcription_element_state = false;
         }
