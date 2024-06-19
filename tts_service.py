@@ -14,7 +14,7 @@ class WhisperSpeechTTS:
         pass
     
     def initialize_model(self):
-        os.environ["CUDA_VISIBLE_DEVICES"]="0"
+        os.environ["CUDA_VISIBLE_DEVICES"]="0,1"
         self.pipe = Pipeline(s2a_ref='collabora/whisperspeech:s2a-q4-small-en+pl.model', torch_compile=True, device="cuda")
         self.last_llm_response = None
 
