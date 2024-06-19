@@ -228,6 +228,7 @@ function new_text_element(text, id) {
     text_element.innerHTML = "<p>" + text + "</p>";
 
     var dummy_element = document.createElement("div");
+    console.log(text);
 
     text_container.appendChild(text_element);
     text_container.appendChild(dummy_element);
