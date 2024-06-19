@@ -12,7 +12,7 @@ var recordingTime = 0;
 var server_state = 0;
 var websocket_audio = null;
 let audioContext_tts = null;
-var you_name = "Marcus"
+var you_name = "Jakub"
 
 var audioContext = null;
 var audioWorkletNode = null;
