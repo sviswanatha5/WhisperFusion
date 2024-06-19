@@ -28,7 +28,7 @@ class WhisperSpeechTTS:
         for _ in tqdm(range(3), desc="Warming up"):
             inputs = self.processor("This is a test!", voice_preset="v2/en_speaker_3")
             
-            self.model.generate(**inputs).cpu().numpy()
+            self.model.generate(**inputs.cuda()).cpu().numpy()
             # self.pipe.generate("Hello, I am warming up.")
         logging.info("[WhisperSpeech INFO:] Warmed up Whisper Speech torch compile model. Connect to the WebGUI now.")
         should_send_server_ready.value = True
@@ -66,7 +66,7 @@ class WhisperSpeechTTS:
                     inputs = self.processor(llm_output, voice_preset="v2/en_speaker_3")
                     
                     start = time.time()
-                    audio = self.model.generate(**inputs).cpu().numpy()
+                    audio = self.model.generate(**inputs.cuda()).cpu().numpy()
                     # audio = self.pipe.generate(llm_output.strip(), step_callback=should_abort)
                     inference_time = time.time() - start
                     logging.info(f"[WhisperSpeech INFO:] TTS inference done in {inference_time} ms.\n\n")
