@@ -6,6 +6,8 @@ logging.basicConfig(level = logging.INFO)
 from tqdm import tqdm
 from websockets.sync.server import serve
 from whisperspeech.pipeline import Pipeline
+import torch.nn as nn
+
 
 import os
 
@@ -17,6 +19,8 @@ class WhisperSpeechTTS:
         os.environ["CUDA_VISIBLE_DEVICES"]="0,1"
         self.pipe = Pipeline(s2a_ref='collabora/whisperspeech:s2a-q4-small-en+pl.model', torch_compile=True, device="cuda")
         self.last_llm_response = None
+        self.pipe.s2a = nn.DataParallel(self.pipe.s2a)
+
 
     def run(self, host, port, audio_queue=None, should_send_server_ready=None):
         # initialize and warmup model
