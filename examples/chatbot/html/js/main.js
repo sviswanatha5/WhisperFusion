@@ -190,7 +190,7 @@ function initWebSocket() {
             new_transcription_element_state = true;
         }
       } else if ("llm_output" in data) {
-            new_transcription_element("AT&T GLM-4", "Phi.svg");
+            new_transcription_element("AT&T GLM-4", "1.png");
             new_text_element("<p>" +  data["llm_output"] + "</p>", "llm-" + available_transcription_elements);
       }
 
