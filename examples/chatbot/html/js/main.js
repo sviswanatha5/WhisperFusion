@@ -191,7 +191,7 @@ function initWebSocket() {
         }
       } else if ("llm_output" in data) {
             new_transcription_element("Phi-2", "Phi.svg");
-            new_text_element("<p>" +  data["llm_output"][0] + "</p>", "llm-" + available_transcription_elements);
+            new_text_element("<p>" +  data["llm_output"] + "</p>", "llm-" + available_transcription_elements);
       }
 
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
