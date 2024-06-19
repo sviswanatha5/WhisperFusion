@@ -85,7 +85,7 @@ class CustomLLMAPI:
                 conversation_history[user].add_to_history("user", prompt)
                 llm_response = self.process_transcription(prompt, conversation_history[user])
                 if not llm_response:
-                    llm_response = "The API is currently not functioning and has returned None"
+                    llm_response = "The service is currently not available"
                 logging.info(f"RESPONSE: {llm_response}")
                 self.infer_time = time.time() - start
                 conversation_history[user].add_to_history("assistant", llm_response)
