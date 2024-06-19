@@ -13,6 +13,8 @@ class ConversationHistory:
         self.history = []
 
     def add_to_history(self, speaker, message):
+        if len(self.history) > 10:
+            self.history.pop(0)
         self.history.append({"speaker": speaker, "message": message})
 
     def get_formatted_history(self, add_generation_prompt=True):
