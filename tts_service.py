@@ -15,21 +15,21 @@ class WhisperSpeechTTS:
         pass
     
     def initialize_model(self):
-        os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3"  # Set this to the number of GPUs you have
+        os.environ["CUDA_VISIBLE_DEVICES"]="0,1"  # Set this to the number of GPUs you have
 
         # Initialize the Pipeline
         self.pipe = Pipeline(
             s2a_ref='collabora/whisperspeech:s2a-q4-small-en+pl.model', 
             torch_compile=True, 
-            device="cuda"
+            device="cuda:0,1"
         )
 
         # Wrap the model with DataParallel for multi-GPU support
         if torch.cuda.device_count() > 1:
             logging.info(f"Using {torch.cuda.device_count()} GPUs")
-            self.pipe.s2a = nn.DataParallel(self.pipe.s2a)
+            self.pipe.s2a = nn.DataParallel(self.pipe.s2a, [0,1])
 
-        self.pipe.s2a.to('cuda')  # Ensure the model is on the GPU
+        #self.pipe.s2a.to('cuda')  # Ensure the model is on the GPU
         self.last_llm_response = None
 
     def run(self, host, port, audio_queue=None, should_send_server_ready=None):
