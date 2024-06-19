@@ -77,7 +77,7 @@ class CustomLLMAPI:
             prompt = transcription_output['prompt'].strip()
             user = transcription_output['uid']
 
-            logging.info(f"PROMPT: {prompt}, EOS: {transcription_output["eos"]}")
+            #logging.info(f"PROMPT: {prompt}, EOS: {transcription_output["eos"]}")
 
             if user not in conversation_history:
                 conversation_history[user] = ConversationHistory()
