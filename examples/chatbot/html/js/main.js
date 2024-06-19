@@ -178,7 +178,7 @@ function initWebSocket() {
             }
 
             new_transcription_element(you_name, img_src);
-            new_text_element("<p>" +  data["segments"].text + "</p>", "transcription-" + available_transcription_elements);
+            new_text_element("<p>" +  data["segments"][0].text + "</p>", "transcription-" + available_transcription_elements);
             if (audio_playing) {
                 audio_source.stop();
             }
@@ -191,7 +191,7 @@ function initWebSocket() {
         }
       } else if ("llm_output" in data) {
             new_transcription_element("AT&T GLM-4", "Phi.svg");
-            new_text_element("<p>" +  data["llm_output"] + "</p>", "llm-" + available_transcription_elements);
+            new_text_element("<p>" +  data["llm_output"][0] + "</p>", "llm-" + available_transcription_elements);
       }
 
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
