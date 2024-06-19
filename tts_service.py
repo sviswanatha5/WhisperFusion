@@ -29,7 +29,7 @@ class WhisperSpeechTTS:
             logging.info(f"Using {torch.cuda.device_count()} GPUs")
             self.pipe.s2a = nn.DataParallel(self.pipe.s2a)
 
-        self.pipe.model.to('cuda')  # Ensure the model is on the GPU
+        self.pipe.s2a.to('cuda')  # Ensure the model is on the GPU
         self.last_llm_response = None
 
     def run(self, host, port, audio_queue=None, should_send_server_ready=None):
