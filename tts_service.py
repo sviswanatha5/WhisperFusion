@@ -17,7 +17,7 @@ class WhisperSpeechTTS:
     def initialize_model(self):
         device = "cuda"  # if torch.cuda.is_available() else "cpu"
         self.model = BarkModel.from_pretrained("suno/bark-small", torch_dtype=torch.float16).to(device)
-        self.processor = BarkProcessor.from_pretrained("suno/bark-small")
+        self.processor = BarkProcessor.from_pretrained("suno/bark-small").to(device)
         #self.pipe = Pipeline(s2a_ref='collabora/whisperspeech:s2a-q4-tiny-en+pl.model', torch_compile=True, device="cuda")
         self.last_llm_response = None
 
