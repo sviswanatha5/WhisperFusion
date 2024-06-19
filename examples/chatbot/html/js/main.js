@@ -166,6 +166,10 @@ function initWebSocket() {
         }
       } else if ("segments" in data) {
         if (new_transcription_element_state) {
+            if (audio_playing) {
+                audio_source.stop();
+                audio_playing = false;
+            }
             available_transcription_elements = available_transcription_elements + 1;
 
             var img_src = "0.png";
@@ -181,11 +185,7 @@ function initWebSocket() {
             }
 
             new_transcription_element(you_name, img_src);
-            new_text_element("<p>" +  data["segments"].text + "</p>", "transcription-" + available_transcription_elements);
-            if (audio_playing) {
-                audio_source.stop();
-                audio_playing = false;
-            }
+            new_text_element("<p>" +  data["segments"][0].text + "</p>", "transcription-" + available_transcription_elements);
             new_transcription_element_state = false;
         }
         document.getElementById("transcription-" + available_transcription_elements).innerHTML = "<p>" + data["segments"][0].text + "</p>"; 
