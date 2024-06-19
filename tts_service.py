@@ -36,8 +36,8 @@ class WhisperSpeechTTS:
         # initialize and warmup model
         self.initialize_model()
         logging.info("\n[WhisperSpeech INFO:] Warming up torch compile model. Please wait ...\n")
-        for _ in tqdm(range(3), desc="Warming up"):
-            self.pipe.module.generate("Hello, I am warming up.")
+        #for _ in tqdm(range(3), desc="Warming up"):
+            #self.pipe.module.generate("Hello, I am warming up.")
         logging.info("[WhisperSpeech INFO:] Warmed up Whisper Speech torch compile model. Connect to the WebGUI now.")
         should_send_server_ready.value = True
 
