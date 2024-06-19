@@ -129,8 +129,6 @@ class TranscriptionServer:
         )
 
         self.clients[websocket] = client
-        logging.info(f"Websocket: {websocket}")
-        logging.info(f"Client_uid: {client.client_uid}")
         self.clients_start_time[websocket] = time.time()
         no_voice_activity_chunks = 0
         print()
