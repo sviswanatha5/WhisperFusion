@@ -139,7 +139,7 @@ function initWebSocket() {
         }
 
         audio_streams.forEach(function(entry) {
-            console.log(entry);
+            console.log("Entry: " + entry);
           });
 
         audio_source = audioContext_tts.createBufferSource();
@@ -147,6 +147,7 @@ function initWebSocket() {
         audio_source.connect(audioContext_tts.destination);
         audio_source.addEventListener('ended', () => {
             console.log("Entered event listener");
+            console.log("Audio Streams.length " + audio_streams)
             if (audio_streams.length > 0) {
                 currently_playing = audio_streams.shift();
                 currently_playing.start();
@@ -157,6 +158,7 @@ function initWebSocket() {
             }
             
         });
+        console.log("Audio_playing: " + audio_playing);
         if (!audio_playing) {
             currently_playing = audio_source;
             currently_playing.start();
@@ -199,10 +201,6 @@ function initWebSocket() {
         }
       } else if ("segments" in data) {
         if (new_transcription_element_state) {
-            if (audio_playing) {
-                audio_source.stop();
-                audio_playing = false;
-            }
             available_transcription_elements = available_transcription_elements + 1;
 
             var img_src = "0.png";
