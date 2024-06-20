@@ -82,17 +82,44 @@ class CustomLLMAPI:
                 self.eos = transcription_output["eos"]
                 start = time.time()
                 conversation_history[user].add_to_history("user", prompt)
+                
+                total_response = ""
+
+                current_response = ""
+                
                 llm_response = self.process_transcription(prompt, conversation_history[user])
                 if not llm_response:
                     llm_response = "The service is currently not available"
+                
+                if "." or "?" or "!" in llm_response:
+                    if "." in llm_response:
+                        split = llm_response.split(".")
+                        punc = "."
+                    elif "?" in llm_response:
+                        split = llm_response.split("?")
+                        punc = "?"
+                    else:
+                        split = llm_response.split("!")
+                        punc = "!"
+
+                    logging.info(f"current chunk: {llm_response}")
+
+                    current_response += split[0] + punc
+                    audio_queue.put({"llm_output": current_response, "eos": self.eos})
+                    total_response += current_response
+
+                    current_response = split[1]
+                else:
+                    current_response += llm_response
+                    
                 logging.info(f"RESPONSE: {llm_response}")
                 self.infer_time = time.time() - start
                 logging.info(f"API INFERENCE TIME: {self.infer_time}")
-                conversation_history[user].add_to_history("assistant", llm_response)
-                audio_queue.put({"message_id": message_id, "llm_output": llm_response, "eos": self.eos})
+                conversation_history[user].add_to_history("assistant", total_response)
+                #audio_queue.put({"message_id": message_id, "llm_output": llm_response, "eos": self.eos})
                 llm_queue.put({
                         "uid": user,
-                        "llm_output": llm_response,
+                        "llm_output": total_response,
                         "eos": self.eos,
                         "latency": self.infer_time
                     })
