@@ -6,9 +6,6 @@ from tqdm import tqdm
 from websockets.sync.server import serve
 from whisperspeech.pipeline import Pipeline
 
-import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '0,1'
-
 from transformers import BarkModel, BarkProcessor
 import torch
 
@@ -17,7 +14,8 @@ class WhisperSpeechTTS:
         pass
 
     def initialize_model(self):
-        torch.cuda.set_device('cuda:0,1')
+        torch.cuda.set_device('cuda:0')
+        logging.info(f"Available devices: {torch.cuda.device_conut()}")
         device = torch.cuda.current_device()
         self.model = BarkModel.from_pretrained("suno/bark-small", torch_dtype=torch.float16).to(device)
         self.processor = BarkProcessor.from_pretrained("suno/bark-small")
