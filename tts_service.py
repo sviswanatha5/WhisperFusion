@@ -6,7 +6,7 @@ from tqdm import tqdm
 from websockets.sync.server import serve
 from whisperspeech.pipeline import Pipeline
 
-from Transformers import BarkModel, BarkProcessor
+from transformers import BarkModel, BarkProcessor
 import torch
 
 class WhisperSpeechTTS:
