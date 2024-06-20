@@ -96,6 +96,7 @@ class CustomLLMAPI:
                 logging.info(f"API INFERENCE TIME: {self.infer_time}")
                 conversation_history[user].add_to_history("assistant", llm_response)
                 for i in range(0,2):
+                    logging.info(f"For LOOP: Iteration {i}'s addition")
                     audio_queue.put({"message_id": message_id, "llm_output": llm_response, "eos": self.eos})
                     audio_queue.put({"message_id": message_id, "llm_output": llm_response, "eos": self.eos})
 
