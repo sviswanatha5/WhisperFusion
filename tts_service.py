@@ -15,7 +15,7 @@ class WhisperSpeechTTS:
 
     def initialize_model(self):
         torch.cuda.set_device('cuda:0')
-        logging.info(f"Available devices: {torch.cuda.device_conut()}")
+        logging.info(f"Available devices: {torch.cuda.device_count()}")
         device = torch.cuda.current_device()
         self.model = BarkModel.from_pretrained("suno/bark-small", torch_dtype=torch.float16).to(device)
         self.processor = BarkProcessor.from_pretrained("suno/bark-small")
