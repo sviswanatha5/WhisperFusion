@@ -90,6 +90,13 @@ class CustomLLMAPI:
                 llm_response = self.process_transcription(prompt, conversation_history[user])
                 if not llm_response:
                     llm_response = "The service is currently not available"
+                    audio_queue.put({"message_id": message_id, "llm_output": llm_response, "eos": self.eos})
+                    llm_queue.put({
+                            "uid": user,
+                            "llm_output": llm_response,
+                            "eos": self.eos,
+                            "latency": self.infer_time
+                        })
                 logging.info(f"RESPONSE: {llm_response}")
                 self.infer_time = time.time() - start
                 logging.info(f"API INFERENCE TIME: {self.infer_time}")
