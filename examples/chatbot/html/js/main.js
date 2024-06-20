@@ -122,13 +122,14 @@ function initWebSocket() {
         var data = JSON.parse(e.data);
         
         let message_id = data["message_id"];
-        let float32Array = new Float32Array(atob(data["audio"]));
+        bytes = Uint8Array.from(data["audio"], c => c.charCodeAt(0))
+        let float32Array = new Float32Array(bytes);
         let audioBuffer = audioContext_tts.createBuffer(1, float32Array.length, 24000);
         audioBuffer.getChannelData(0).set(float32Array);
 
-        // new_whisper_speech_audio_element("audio-" + available_audio_elements, Math.floor(audioBuffer.duration));
+        new_whisper_speech_audio_element("audio-" + available_audio_elements, Math.floor(audioBuffer.duration));
 
-        // audio_sources.push(audioBuffer);
+        audio_sources.push(audioBuffer);
 
         if (last_audio_id != message_id) {
             currently_playing.stop();
@@ -154,6 +155,7 @@ function initWebSocket() {
         });
         if (!audio_playing) {
             audio_source.start();
+            console.log("Audio should be playing now");
             currently_playing = audio_source;
             audio_playing = true;
         } else {
