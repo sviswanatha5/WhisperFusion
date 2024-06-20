@@ -142,8 +142,8 @@ function initWebSocket() {
         audio_source.buffer = audioBuffer;
         audio_source.connect(audioContext_tts.destination);
         audio_source.addEventListener('ended', () => {
-            if (audio_sources.length > 0) {
-                currently_playing = audio_sources.shift();
+            if (audio_streams.length > 0) {
+                currently_playing = audio_streams.shift();
                 currently_playing.start();
                 audio_playing = true
             } else {
@@ -153,9 +153,9 @@ function initWebSocket() {
             
         });
         if (!audio_playing) {
-            audio_source.start();
-            console.log("Audio should be playing now");
             currently_playing = audio_source;
+            currently_playing.start();
+            console.log("Audio should be playing now");
             audio_playing = true;
         } else {
             audio_streams.push(audio_source);
