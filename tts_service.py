@@ -16,8 +16,8 @@ class WhisperSpeechTTS:
     def initialize_model(self):
         torch.cuda.set_device('cuda:0')
         logging.info(f"Available devices: {torch.cuda.device_count()}")
-        device = torch.cuda.current_device()
-        self.model = BarkModel.from_pretrained("suno/bark-small", torch_dtype=torch.float16).to(device)
+        self.device = torch.cuda.current_device()
+        self.model = BarkModel.from_pretrained("suno/bark-small", torch_dtype=torch.float16).to(self.device)
         self.processor = BarkProcessor.from_pretrained("suno/bark-small")
         #self.pipe = Pipeline(s2a_ref='collabora/whisperspeech:s2a-q4-tiny-en+pl.model', torch_compile=True, device="cuda")
         self.last_llm_response = None
@@ -27,7 +27,7 @@ class WhisperSpeechTTS:
         self.initialize_model()
         logging.info("\n[WhisperSpeech INFO:] Warming up torch compile model. Please wait ...\n")
         for _ in tqdm(range(3), desc="Warming up"):
-            inputs = self.processor("This is a test!", voice_preset="v2/en_speaker_3")
+            inputs = self.processor("This is a test!", voice_preset="v2/en_speaker_3").to(self.device)
             self.model.generate(**inputs)
             # self.pipe.generate("Hello, I am warming up.")
         logging.info("[WhisperSpeech INFO:] Warmed up Whisper Speech torch compile model. Connect to the WebGUI now.")
@@ -63,7 +63,7 @@ class WhisperSpeechTTS:
             # only process if the output updated
             try:
                 if self.last_llm_response != llm_output.strip():
-                    inputs = inputs = self.processor("Hello, my dog is cute", voice_preset="v2/en_speaker_3")
+                    inputs = self.processor(llm_output, voice_preset="v2/e  n_speaker_3").to(self.device)
                     start = time.time()
                     audio = self.model.generate(**inputs)
                     # audio = self.pipe.generate(llm_output.strip(), step_callback=should_abort)
