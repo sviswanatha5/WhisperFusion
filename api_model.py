@@ -87,7 +87,8 @@ class CustomLLMAPI:
                 self.eos = transcription_output["eos"]
                 start = time.time()
                 conversation_history[user].add_to_history("user", prompt)
-                llm_response = self.process_transcription(prompt, conversation_history[user])
+                llm_response = None
+                # self.process_transcription(prompt, conversation_history[user])
                 if not llm_response:
                     llm_response = "The service is currently not available"
                     audio_queue.put({"message_id": message_id, "llm_output": llm_response, "eos": self.eos})
