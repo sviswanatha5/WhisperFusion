@@ -6,6 +6,9 @@ from tqdm import tqdm
 from websockets.sync.server import serve
 from whisperspeech.pipeline import Pipeline
 
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '0,1'
+
 from transformers import BarkModel, BarkProcessor
 import torch
 
