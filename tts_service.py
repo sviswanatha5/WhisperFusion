@@ -63,7 +63,8 @@ class WhisperSpeechTTS:
             # only process if the output updated
             try:
                 if self.last_llm_response != llm_output.strip():
-                    inputs = self.processor(llm_output, voice_preset="v2/en_speaker_3").to(self.device)
+                    logging.info(f"[WHISPERSPEECH INFO:] LLM_OUTPUT: {llm_output.strip()}")
+                    inputs = self.processor(llm_output.strip(), voice_preset="v2/en_speaker_1").to(self.device)
                     start = time.time()
                     audio = self.model.generate(**inputs)
                     # audio = self.pipe.generate(llm_output.strip(), step_callback=should_abort)
