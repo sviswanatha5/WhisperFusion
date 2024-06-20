@@ -72,7 +72,7 @@ if __name__ == "__main__":
     )
     whisper_process.start()
 
-    custom_llm_api = CustomLLMAPI(api_url=args.api_url, api_key=args.api_key)    
+    custom_llm_api = CustomLLMAPI(api_url=args.api_url)    
 
     llm_process = multiprocessing.Process(
         target=custom_llm_api.run,
