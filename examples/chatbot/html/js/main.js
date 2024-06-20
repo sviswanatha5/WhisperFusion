@@ -134,14 +134,19 @@ function initWebSocket() {
             currently_playing.stop();
             audio_streams = [];
             currently_playing = null;
-            last_audio_id = message;
+            last_audio_id = message_id;
             audio_playing = false;
         }
+
+        audio_streams.forEach(function(entry) {
+            console.log(entry);
+          });
 
         audio_source = audioContext_tts.createBufferSource();
         audio_source.buffer = audioBuffer;
         audio_source.connect(audioContext_tts.destination);
         audio_source.addEventListener('ended', () => {
+            console.log("Entered event listener");
             if (audio_streams.length > 0) {
                 currently_playing = audio_streams.shift();
                 currently_playing.start();
@@ -158,6 +163,7 @@ function initWebSocket() {
             console.log("Audio should be playing now");
             audio_playing = true;
         } else {
+            console.log(audio_source + " added to queueu");
             audio_streams.push(audio_source);
         }
         
@@ -324,7 +330,6 @@ function new_whisper_speech_audio_element(id, duration) {
         if (audio_source) {
             audio_source.disconnect();
         }
-
         audio_source = audioContext_tts.createBufferSource();
         audio_source.buffer = audio_sources[id];
         audio_source.connect(audioContext_tts.destination);
