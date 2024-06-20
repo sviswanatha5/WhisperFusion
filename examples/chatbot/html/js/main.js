@@ -122,8 +122,7 @@ function initWebSocket() {
         var data = JSON.parse(e.data);
         
         let message_id = data["message_id"];
-        bytes = Uint8Array.from(data["audio"], c => c.charCodeAt(0))
-        let float32Array = new Float32Array(bytes);
+        let float32Array = new Float32Array(aton(data["audio"]));
         let audioBuffer = audioContext_tts.createBuffer(1, float32Array.length, 24000);
         audioBuffer.getChannelData(0).set(float32Array);
 

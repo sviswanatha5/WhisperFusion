@@ -71,7 +71,7 @@ class WhisperSpeechTTS:
                 try:
                     websocket.send(json.dumps({
                             "message_id": message_id,
-                            "audio": str(self.output_audio.tobytes())
+                            "audio": str(base64.b64encode(self.output_audio.tobytes()))
                         }))
                 except Exception as e:
                     logging.error(f"[WhisperSpeech ERROR:] Audio error: {e}")
