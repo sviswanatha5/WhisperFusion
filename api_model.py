@@ -9,7 +9,7 @@ from jinja2 import Template
 logging.basicConfig(level=logging.INFO)
 
 class ConversationHistory:
-    def init(self):
+    def __init__(self):
         self.history = []
 
     def add_to_history(self, speaker, message):
