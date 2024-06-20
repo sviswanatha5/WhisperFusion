@@ -22,6 +22,7 @@ var available_llm_elements = 0;
 var available_audio_elements = 0;
 var llm_outputs = [];
 var new_transcription_element_state = true;
+var new_llm_element_state = true;
 var audio_sources = [];
 var audio_streams = [];
 var audio_source = null;
@@ -147,7 +148,7 @@ function initWebSocket() {
         audio_source.connect(audioContext_tts.destination);
         audio_source.addEventListener('ended', () => {
             console.log("Entered event listener");
-            console.log("Audio Streams.length " + audio_streams)
+            console.log("Audio Streams.length " + audio_streams.length)
             if (audio_streams.length > 0) {
                 currently_playing = audio_streams.shift();
                 currently_playing.start();
@@ -225,8 +226,18 @@ function initWebSocket() {
             new_transcription_element_state = true;
         }
       } else if ("llm_output" in data) {
-            new_transcription_element("AT&T GLM-4", "1.png");
-            new_text_element("<p>" +  data["llm_output"] + "</p>", "llm-" + available_transcription_elements);
+
+            if (new_llm_element_state) {
+                available_llm_elements = available_llm_elements + 1
+                new_transcription_element("AT&T GLM-4", "1.png");
+                new_text_element("<p>" +  data["llm_output"] + "</p>", "llm-" + available_transcription_elements);
+                new_llm_element_state = false;
+            }
+            document.getElementById("llm-" + available_transcription_elements).innerHTML = "<p>" + data["llm_output"] + "</p>"; 
+
+            if (data["eos"] == true) {
+                new_llm_element_state = true;
+            }
       }
 
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
