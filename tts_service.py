@@ -6,6 +6,7 @@ from tqdm import tqdm
 from websockets.sync.server import serve
 from whisperspeech.pipeline import Pipeline
 import json
+import base64
 
 
 class WhisperSpeechTTS:
@@ -70,7 +71,7 @@ class WhisperSpeechTTS:
                 try:
                     websocket.send(json.dumps({
                             "message_id": message_id,
-                            "audio": self.output_audio.tobytes().encode('base64')
+                            "audio": base64.b64encode(self.output_audio.tobytes())
                         }))
                 except Exception as e:
                     logging.error(f"[WhisperSpeech ERROR:] Audio error: {e}")
