@@ -23,8 +23,11 @@ var available_audio_elements = 0;
 var llm_outputs = [];
 var new_transcription_element_state = true;
 var audio_sources = [];
+var audio_streams = [];
 var audio_source = null;
 var audio_playing = false;
+var last_audio_id = 0;
+var currently_playing = null;
 
 initWebSocket();
 
@@ -116,24 +119,47 @@ function initWebSocket() {
     websocket_audio.onclose = function(e) { }
     websocket_audio.onmessage = function(e) {
         available_audio_elements++;
+        var data = JSON.parse(e.data);
         
-        let float32Array = new Float32Array(e.data);
+        let message_id = data["message_id"];
+        let float32Array = new Float32Array(data["audio"]);
         let audioBuffer = audioContext_tts.createBuffer(1, float32Array.length, 24000);
         audioBuffer.getChannelData(0).set(float32Array);
 
-        new_whisper_speech_audio_element("audio-" + available_audio_elements, Math.floor(audioBuffer.duration));
+        // new_whisper_speech_audio_element("audio-" + available_audio_elements, Math.floor(audioBuffer.duration));
 
-        audio_sources.push(audioBuffer);
+        // audio_sources.push(audioBuffer);
+
+        if (last_audio_id != message_id) {
+            currently_playing.stop();
+            audio_streams = [];
+            currently_playing = null;
+            last_audio_id = message;
+            audio_playing = false;
+        }
 
         audio_source = audioContext_tts.createBufferSource();
         audio_source.buffer = audioBuffer;
         audio_source.connect(audioContext_tts.destination);
-        if (audio_playing) {
-            audio_source.stop()
+        audio_source.addEventListener('ended', () => {
+            if (audio_sources.length > 0) {
+                currently_playing = audio_sources.shift();
+                currently_playing.start();
+                audio_playing = true
+            } else {
+                currently_playing = null;
+                audio_playing = false;
+            }
+            
+        });
+        if (!audio_playing) {
+            audio_source.start();
+            currently_playing = audio_source;
+            audio_playing = true;
+        } else {
+            audio_streams.push(audio_source);
         }
-        audio_source.start();
-        audio_playing = true;
-
+        
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 

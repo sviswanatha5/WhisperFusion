@@ -69,6 +69,7 @@ class CustomLLMAPI:
             return None
 
     def run(self, transcription_queue, audio_queue, llm_queue, conversation_history):
+        message_id = 0
         while True:
             transcription_output = transcription_queue.get()
             if transcription_queue.qsize() != 0:
@@ -93,7 +94,7 @@ class CustomLLMAPI:
                 self.infer_time = time.time() - start
                 logging.info(f"API INFERENCE TIME: {self.infer_time}")
                 conversation_history[user].add_to_history("assistant", llm_response)
-                audio_queue.put({"llm_output": llm_response, "eos": self.eos})
+                audio_queue.put({"message_id": message_id, "llm_output": llm_response, "eos": self.eos})
                 llm_queue.put({
                         "uid": user,
                         "llm_output": llm_response,
@@ -102,6 +103,7 @@ class CustomLLMAPI:
                     })
                 self.last_prompt = ""  # Reset last prompt after processing
                 self.eos = False  # Reset eos after processing
+                message_id += 1
                 continue
             
             self.last_prompt = prompt

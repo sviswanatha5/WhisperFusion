@@ -5,6 +5,9 @@ logging.basicConfig(level = logging.INFO)
 from tqdm import tqdm
 from websockets.sync.server import serve
 from whisperspeech.pipeline import Pipeline
+import json
+
+
 class WhisperSpeechTTS:
     def __init__(self):
         pass
@@ -47,6 +50,7 @@ class WhisperSpeechTTS:
             llm_output = llm_response["llm_output"]
             logging.info(f"[WhisperSpeech INFO:] LLM Response: {llm_output} \n\n")
             self.eos = llm_response["eos"]
+            message_id = llm_response["message_id"]
             def should_abort():
                 if not audio_queue.empty(): raise TimeoutError()
             # only process if the output updated
@@ -64,6 +68,9 @@ class WhisperSpeechTTS:
                 logging.error(f"[WhisperSpeech ERROR:] Received {llm_output} from API. Should not be None")
             if self.eos and self.output_audio is not None:
                 try:
-                    websocket.send(self.output_audio.tobytes())
+                    websocket.send(json.dumps({
+                            "message_id": message_id,
+                            "message": self.output_audio.tobytes()
+                        }))
                 except Exception as e:
                     logging.error(f"[WhisperSpeech ERROR:] Audio error: {e}")
