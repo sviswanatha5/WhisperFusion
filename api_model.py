@@ -2,6 +2,7 @@ import requests
 import logging
 import time
 import json
+import asyncio
 from queue import Queue
 from typing import List, Dict, Any
 from jinja2 import Template
@@ -51,14 +52,14 @@ class CustomLLMAPI:
                 for chunk in response.iter_content(1024):
                     response_text += chunk.decode('utf-8')
                     logging.info(f"Response chunk: {chunk.decode('utf-8')}")
-                return response_text
+                    yield response_text
             else:
                 return "Error: " + response.text
 
     def process_transcription(self, transcription_text, conversation_history: ConversationHistory):
         try:
-            llm_response = self.query([{"speaker": "user", "message": transcription_text}], conversation_history)
-            return llm_response
+            llm_response = asyncio.run(self.query([{"speaker": "user", "message": transcription_text}], conversation_history))
+            yield llm_response
         except Exception as e:
             logging.error(f"Error querying custom LLM API: {e}")
             return None
@@ -92,7 +93,7 @@ class CustomLLMAPI:
                 
                 while llm_response or not total_response:
                 
-                    llm_response = self.process_transcription(prompt, conversation_history[user])
+                    llm_response = asyncio.run(self.process_transcription(prompt, conversation_history[user]))
                     self.infer_time = time.time() - start
                     if not llm_response and not total_response:
                         llm_response = "The service is currently not available."
