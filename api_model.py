@@ -108,11 +108,8 @@ class CustomLLMAPI:
                     logging.info(f"Response status code: {response.status_code}")
                     if response.status_code == 200:
                         for chunk in response.iter_content(1024):
-                            logging.info(f"CHUNK: {chunk.decode("utf-8")}")
-                            transcription_output = transcription_queue.get()
-                            eos = transcription_output["eos"]
-                            logging.info(f"EOS: {eos}")
-                            if transcription_output["eos"]:
+                            logging.info(f"TRANSCRIPTION QUEUE SIZE: {transcription_queue.qsize()}")
+                            if not transcription_queue.empty():
                                 break
                             llm_response = chunk.decode('utf-8')
                             if not llm_response:
