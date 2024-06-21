@@ -96,10 +96,10 @@ class CustomLLMAPI:
                 history_prompt = conversation_history[user].get_formatted_history(formatted_prompt)
                 params = {
                     "query": history_prompt,
-                    "top_p": 0.8,
+                    "top_p": 0.9,
                     "top_k": 10,
-                    "temperature": 0.95,
-                    "max_new_tokens": 2048
+                    "temperature": 0.3,
+                    "max_new_tokens": 1024
                 }
                 logging.info(f"Sending request to: {self.api_url}")
                 logging.info(f"Params: {params}")
@@ -109,7 +109,9 @@ class CustomLLMAPI:
                     if response.status_code == 200:
                         for chunk in response.iter_content(1024):
                             logging.info(f"TRANSCRIPTION QUEUE SIZE: {transcription_queue.qsize()}")
-                            if not transcription_queue.empty():
+                            transcription_output = transcription_queue.get()
+                            logging.info(f"Transciprtion queue contents: {transcription_output["prompt"]}")
+                            if transcription_output["prompt"] == "":
                                 break
                             llm_response = chunk.decode('utf-8')
                             if not llm_response:
