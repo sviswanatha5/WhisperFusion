@@ -346,12 +346,9 @@ class ServeClient:
             # send the LLM outputs
             try:
                 llm_response = None
-                if self.llm_queue is not None:
-                    while not self.llm_queue.empty():
-                        llm_response = self.llm_queue.get()
-                    
-                    if llm_response:
-                        self.websocket.send(json.dumps(llm_response))
+                if not self.llm_queue.empty():
+                    llm_response = self.llm_queue.get()
+                    self.websocket.send(json.dumps(llm_response))
             except queue.Empty:
                 pass
             
