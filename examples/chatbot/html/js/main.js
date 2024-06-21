@@ -127,9 +127,9 @@ function initWebSocket() {
         let audioBuffer = audioContext_tts.createBuffer(1, float32Array.length, 24000);
         audioBuffer.getChannelData(0).set(float32Array);
 
-        new_whisper_speech_audio_element("audio-" + available_audio_elements, Math.floor(audioBuffer.duration));
+        //new_whisper_speech_audio_element("audio-" + available_audio_elements, Math.floor(audioBuffer.duration));
 
-        audio_sources.push(audioBuffer);
+       // audio_sources.push(audioBuffer);
 
         if (last_audio_id != message_id) {
             currently_playing.stop();
