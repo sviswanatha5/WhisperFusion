@@ -31,38 +31,38 @@ class CustomLLMAPI:
         self.api_url = api_url
         self.last_prompt = ""
 
-    def query(self, messages: List[Dict[str, Any]], conversation_history: ConversationHistory):
+    # def query(self, messages: List[Dict[str, Any]], conversation_history: ConversationHistory):
         
-        formatted_prompt = messages[-1]['message']
-        history_prompt = conversation_history.get_formatted_history(formatted_prompt)
-        params = {
-            "query": history_prompt,
-            "top_p": 0.8,
-            "top_k": 10,
-            "temperature": 0.95,
-            "max_new_tokens": 2048
-        }
-        logging.info(f"Sending request to: {self.api_url}")
-        logging.info(f"Params: {params}")
+    #     formatted_prompt = messages[-1]['message']
+    #     history_prompt = conversation_history.get_formatted_history(formatted_prompt)
+    #     params = {
+    #         "query": history_prompt,
+    #         "top_p": 0.8,
+    #         "top_k": 10,
+    #         "temperature": 0.95,
+    #         "max_new_tokens": 2048
+    #     }
+    #     logging.info(f"Sending request to: {self.api_url}")
+    #     logging.info(f"Params: {params}")
 
-        with requests.get(self.api_url, params=params, stream=True) as response:
-            logging.info(f"Response status code: {response.status_code}")
-            if response.status_code == 200:
-                response_text = ""
-                for chunk in response.iter_content(1024):
-                    response_text += chunk.decode('utf-8')
-                    logging.info(f"Response chunk: {chunk.decode('utf-8')}")
-                    yield response_text
-            else:
-                return "Error: " + response.text
+    #     with requests.get(self.api_url, params=params, stream=True) as response:
+    #         logging.info(f"Response status code: {response.status_code}")
+    #         if response.status_code == 200:
+    #             response_text = ""
+    #             for chunk in response.iter_content(1024):
+    #                 response_text += chunk.decode('utf-8')
+    #                 logging.info(f"Response chunk: {chunk.decode('utf-8')}")
+    #                 yield response_text
+    #         else:
+    #             return "Error: " + response.text
 
-    def process_transcription(self, transcription_text, conversation_history: ConversationHistory):
-        try:
-            llm_response = asyncio.run(self.query([{"speaker": "user", "message": transcription_text}], conversation_history))
-            yield llm_response
-        except Exception as e:
-            logging.error(f"Error querying custom LLM API: {e}")
-            return None
+    # def process_transcription(self, transcription_text, conversation_history: ConversationHistory):
+    #     try:
+    #         llm_response = asyncio.run(self.query([{"speaker": "user", "message": transcription_text}], conversation_history))
+    #         yield llm_response
+    #     except Exception as e:
+    #         logging.error(f"Error querying custom LLM API: {e}")
+    #         return None
 
     def run(self, transcription_queue, audio_queue, llm_queue, conversation_history):
         message_id = 0
@@ -91,49 +91,66 @@ class CustomLLMAPI:
                 
                 llm_response = ""
                 
-                while llm_response or not total_response:
-                
-                    llm_response = asyncio.run(self.process_transcription(prompt, conversation_history[user]))
-                    self.infer_time = time.time() - start
-                    if not llm_response and not total_response:
-                        llm_response = "The service is currently not available."
-                    llm_queue_feed += llm_response
-                    logging.info(f"LLM QUEUE FEED: {llm_queue_feed}")
-                    llm_queue.put({
-                            "uid": user,
-                            "llm_output": llm_queue_feed,
-                            "eos": self.eos,
-                            "latency": self.infer_time
-                        })
-                    
-                    
-                    if any(char in llm_response for char in ['.', '?', '!']):
+                messages = [{"speaker": "user", "message": prompt}]
+                formatted_prompt = messages[-1]['message']
+                history_prompt = conversation_history.get_formatted_history(formatted_prompt)
+                params = {
+                    "query": history_prompt,
+                    "top_p": 0.8,
+                    "top_k": 10,
+                    "temperature": 0.95,
+                    "max_new_tokens": 2048
+                }
+                logging.info(f"Sending request to: {self.api_url}")
+                logging.info(f"Params: {params}")
 
-                        if "." in llm_response:
-                            split = llm_response.split(".")
-                            punc = "."
-                        elif "?" in llm_response:
-                            split = llm_response.split("?")
-                            punc = "?"
-                        else:
-                            split = llm_response.split("!")
-                            punc = "!"
+                with requests.get(self.api_url, params=params, stream=True) as response:
+                    logging.info(f"Response status code: {response.status_code}")
+                    if response.status_code == 200:
+                        for chunk in response.iter_content(1024):
+                            llm_response = chunk.decode('utf-8')
+                            self.infer_time = time.time() - start
+                            if not llm_response and not total_response:
+                                llm_response = "The service is currently not available."
+                            llm_queue_feed += llm_response
+                            logging.info(f"LLM QUEUE FEED: {llm_queue_feed}")
+                            llm_queue.put({
+                                    "uid": user,
+                                    "llm_output": llm_queue_feed,
+                                    "eos": self.eos,
+                                    "latency": self.infer_time
+                                })
+                            
+                            
+                            if any(char in llm_response for char in ['.', '?', '!']):
 
-                        logging.info(f"current chunk: {llm_response}")
+                                if "." in llm_response:
+                                    split = llm_response.split(".")
+                                    punc = "."
+                                elif "?" in llm_response:
+                                    split = llm_response.split("?")
+                                    punc = "?"
+                                else:
+                                    split = llm_response.split("!")
+                                    punc = "!"
 
-                        current_response += split[0] + punc
-                        logging.info(f"CURRENT RESPONSE: {current_response}")
-                        audio_queue.put({"message_id": message_id, "llm_output": current_response, "eos": self.eos})
-                        total_response += current_response
+                                logging.info(f"current chunk: {llm_response}")
 
-                        current_response = ""
+                                current_response += split[0] + punc
+                                logging.info(f"CURRENT RESPONSE: {current_response}")
+                                audio_queue.put({"message_id": message_id, "llm_output": current_response, "eos": self.eos})
+                                total_response += current_response
+
+                                current_response = ""
+                            else:
+                                current_response += llm_response
+                                
+                            logging.info(f"RESPONSE: {llm_response}")
+                            
+                            logging.info(f"API INFERENCE TIME: {self.infer_time}")
+                            logging.info(f"Response chunk: {chunk.decode('utf-8')}")
                     else:
-                        current_response += llm_response
-                        
-                    logging.info(f"RESPONSE: {llm_response}")
-                    
-                    logging.info(f"API INFERENCE TIME: {self.infer_time}")
-                
+                        return "Error: " + response.text
                 
                 conversation_history[user].add_to_history("assistant", total_response)
                 #audio_queue.put({"message_id": message_id, "llm_output": llm_response, "eos": self.eos})
