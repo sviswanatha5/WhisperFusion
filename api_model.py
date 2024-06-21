@@ -80,7 +80,7 @@ class CustomLLMAPI:
                 conversation_history[user] = ConversationHistory()
                 
             if self.last_prompt == prompt and transcription_output["eos"]:
-                self.eos = transcription_output["eos"]
+                self.eos = False
                 start = time.time()
                 conversation_history[user].add_to_history("user", prompt)
                 
@@ -109,6 +109,8 @@ class CustomLLMAPI:
                     if response.status_code == 200:
                         for chunk in response.iter_content(1024):
                             llm_response = chunk.decode('utf-8')
+                            if not llm_response:
+                                self.eos = True
                             self.infer_time = time.time() - start
                             if not llm_response and not total_response:
                                 llm_response = "The service is currently not available."
@@ -160,4 +162,3 @@ class CustomLLMAPI:
                 continue
             
             self.last_prompt = prompt
-            self.eos = transcription_output["eos"]
