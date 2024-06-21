@@ -93,7 +93,7 @@ class CustomLLMAPI:
                 
                 messages = [{"speaker": "user", "message": prompt}]
                 formatted_prompt = messages[-1]['message']
-                history_prompt = conversation_history.get_formatted_history(formatted_prompt)
+                history_prompt = conversation_history[user].get_formatted_history(formatted_prompt)
                 params = {
                     "query": history_prompt,
                     "top_p": 0.8,
