@@ -118,7 +118,7 @@ class CustomLLMAPI:
                     audio_queue.put({"message_id": message_id, "llm_output": current_response, "eos": self.eos})
                     total_response += current_response
 
-                    current_response = split[1]
+                    current_response = ""
                 else:
                     current_response += llm_response
                     
