@@ -90,7 +90,7 @@ class CustomLLMAPI:
                 
                 llm_response = self.process_transcription(prompt, conversation_history[user])
                 self.infer_time = time.time() - start
-                if not llm_response:
+                if not llm_response and not total_response:
                     llm_response = "The service is currently not available."
                 llm_queue_feed += llm_response
                 llm_queue.put({
@@ -127,7 +127,7 @@ class CustomLLMAPI:
                 
                 logging.info(f"API INFERENCE TIME: {self.infer_time}")
                 
-                if llm_response == "<done>":
+                if not llm_response and total_response:
                     conversation_history[user].add_to_history("assistant", total_response)
                 #audio_queue.put({"message_id": message_id, "llm_output": llm_response, "eos": self.eos})
                 self.last_prompt = ""  # Reset last prompt after processing
