@@ -91,7 +91,7 @@ class CustomLLMAPI:
                 llm_response = self.process_transcription(prompt, conversation_history[user])
                 self.infer_time = time.time() - start
                 if not llm_response:
-                    llm_response = "The service is currently not available"
+                    llm_response = "The service is currently not available."
                 llm_queue_feed += llm_response
                 llm_queue.put({
                         "uid": user,
@@ -101,7 +101,8 @@ class CustomLLMAPI:
                     })
                 
                 
-                if "." or "?" or "!" in llm_response:
+                if any(char in llm_response for char in ['.', '?', '!']):
+
                     if "." in llm_response:
                         split = llm_response.split(".")
                         punc = "."
