@@ -110,7 +110,8 @@ class CustomLLMAPI:
                         for chunk in response.iter_content(1024):
                             logging.info(f"TRANSCRIPTION QUEUE SIZE: {transcription_queue.qsize()}")
                             transcription_output = transcription_queue.get()
-                            logging.info(f"Transciprtion queue contents: {transcription_output["prompt"]}")
+                            test = transcription_output["prompt"]
+                            logging.info(f"Transciprtion queue contents: {test}")
                             if transcription_output["prompt"] == "":
                                 break
                             llm_response = chunk.decode('utf-8')
