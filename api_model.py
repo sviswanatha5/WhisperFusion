@@ -126,7 +126,9 @@ class CustomLLMAPI:
                 logging.info(f"RESPONSE: {llm_response}")
                 
                 logging.info(f"API INFERENCE TIME: {self.infer_time}")
-                conversation_history[user].add_to_history("assistant", total_response)
+                
+                if llm_response == "<eos>":
+                    conversation_history[user].add_to_history("assistant", total_response)
                 #audio_queue.put({"message_id": message_id, "llm_output": llm_response, "eos": self.eos})
                 self.last_prompt = ""  # Reset last prompt after processing
                 self.eos = False  # Reset eos after processing
