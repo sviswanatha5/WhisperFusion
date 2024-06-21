@@ -10,7 +10,7 @@ MARKER_FILE="setup_complete.marker"
 
 # Clone this repo and install requirements if the marker file doesn't exist
 if [ ! -f "$MARKER_FILE" ]; then
-    apt-get update 
+    apt update 
 
     apt install ffmpeg portaudio19-dev -y
 
