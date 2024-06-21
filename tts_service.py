@@ -31,7 +31,6 @@ class WhisperSpeechTTS:
             ) as server:
             server.serve_forever()
     def start_whisperspeech_tts(self, websocket, audio_queue=None):
-        self.eos = False
         self.output_audio = None
         while True:
         
@@ -50,7 +49,6 @@ class WhisperSpeechTTS:
             
             llm_output = llm_response["llm_output"]
             logging.info(f"[WhisperSpeech INFO:] LLM Response: {llm_output} \n\n")
-            self.eos = llm_response["eos"]
             message_id = llm_response["message_id"]
             def should_abort():
                 if not audio_queue.empty(): raise TimeoutError()
@@ -67,7 +65,7 @@ class WhisperSpeechTTS:
                 pass
             except AttributeError as e:
                 logging.error(f"[WhisperSpeech ERROR:] Received {llm_output} from API. Should not be None")
-            if self.eos and self.output_audio is not None:
+            if self.output_audio is not None:
                 try:
                     websocket.send(self.output_audio.tobytes())
                 except Exception as e:
