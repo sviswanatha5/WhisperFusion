@@ -29,6 +29,7 @@ var audio_source = null;
 var audio_playing = false;
 var current_message_id = null;
 var currently_playing = null;
+var blacklist = [];
 
 initWebSocket();
 
@@ -152,11 +153,13 @@ function initWebSocket() {
             } else {
                 currently_playing = null;
                 audio_playing = false;
+                blacklist.push(current_message_id);
+                current_message_id = null;
             }
             
         });
         console.log("Audio_playing: " + audio_playing);
-        if (!audio_playing) {
+        if (!audio_playing && blacklist.includes(message_id)) {
             currently_playing = audio_source;
             currently_playing.start();
             console.log("Audio should be playing now");
@@ -202,6 +205,7 @@ function initWebSocket() {
                 currently_playing.stop();
                 audio_playing = false;
             }
+            blacklist.push(current_message_id);
             audio_streams = audio_streams.filter(a => a[0] !== current_message_id);
             current_message_id = null;
             available_transcription_elements = available_transcription_elements + 1;
