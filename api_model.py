@@ -116,8 +116,9 @@ class CustomLLMAPI:
                                 if transcription_output["prompt"] != "":
                                     break
                             llm_response = chunk.decode('utf-8')
-                            if not llm_response:
+                            if llm_response == "<|user|>":
                                 self.eos = True
+                                llm_response = ""
                             self.infer_time = time.time() - start
                             if not llm_response and not total_response:
                                 llm_response = "The service is currently not available."
