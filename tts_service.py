@@ -58,7 +58,7 @@ class WhisperSpeechTTS:
                     #logging.info(f"Audio getting processed: {llm_output.strip()} .\n\n")
 
                     start = time.time()
-                    audio = self.pipe.generate(llm_output.strip(), step_callback=should_abort)
+                    audio = self.pipe.generate(llm_output.strip())
                     inference_time = time.time() - start
                     logging.info(f"[WhisperSpeech INFO:] TTS inference done in {inference_time} ms for  SENTENCE: {llm_output.strip()}.\n\n")
                     self.output_audio = audio.cpu().numpy()
