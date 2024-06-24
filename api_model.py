@@ -121,7 +121,6 @@ class CustomLLMAPI:
                                 llm_response = ""
                             self.infer_time = time.time() - start
                             llm_queue_feed += llm_response
-                            logging.info(f"LLM QUEUE FEED: {llm_queue_feed}")
                             llm_queue.put({
                                     "uid": user,
                                     "llm_output": llm_queue_feed,
