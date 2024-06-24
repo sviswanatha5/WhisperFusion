@@ -202,7 +202,7 @@ function initWebSocket() {
                 currently_playing.stop();
                 audio_playing = false;
             }
-            audio_streams = audio_streams.filter(a => a !== current_message_id)
+            audio_streams = audio_streams.filter(a => a[0] !== current_message_id);
             current_message_id = null;
             available_transcription_elements = available_transcription_elements + 1;
 
