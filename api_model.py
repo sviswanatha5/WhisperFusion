@@ -120,8 +120,6 @@ class CustomLLMAPI:
                                 self.eos = True
                                 llm_response = ""
                             self.infer_time = time.time() - start
-                            if not llm_response and not total_response:
-                                llm_response = "The service is currently not available."
                             llm_queue_feed += llm_response
                             logging.info(f"LLM QUEUE FEED: {llm_queue_feed}")
                             llm_queue.put({

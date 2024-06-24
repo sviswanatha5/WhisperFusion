@@ -175,7 +175,7 @@ class TranscriptionServer:
                 logging.error(e)
                 if self.clients[websocket].client_uid in conversation_history:
                         del conversation_history[self.clients[websocket].client_uid]
-                self.clients[websocket].cleanup()
+                self.clients[websocket].cleanup(transcription_queue, llm_queue)
                 self.clients.pop(websocket)
                 self.clients_start_time.pop(websocket)
                 logging.info("[Whisper INFO:] Connection Closed.")
@@ -429,7 +429,7 @@ class ServeClient:
             )
         )
     
-    def cleanup(self):
+    def cleanup(self, transcription_queue, llm_queue):
         """
         Perform cleanup tasks before exiting the transcription service.
 
@@ -439,5 +439,9 @@ class ServeClient:
 
         """
         logging.info("Cleaning up.")
+        while not transcription_queue.empty():
+            transcription_queue.get()
+        while not llm_queue.empty():
+            llm_queue.get()
         self.exit = True
         # self.transcriber.destroy()
