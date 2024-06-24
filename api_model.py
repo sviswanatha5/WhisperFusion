@@ -156,7 +156,7 @@ class CustomLLMAPI:
                             logging.info(f"RESPONSE: {llm_response}")
                             
                             logging.info(f"API INFERENCE TIME: {self.infer_time}")
-                            logging.info(f"Response chunk: {chunk.decode('utf-8')}")
+                            #logging.info(f"Response chunk: {chunk.decode('utf-8')}")
                     else:
                         return "Error: " + response.text
                 
