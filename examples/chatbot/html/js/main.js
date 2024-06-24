@@ -124,7 +124,8 @@ function initWebSocket() {
         console.log("Type of data: " + typeof e.data);
         
         let float32Array = new Float32Array(e.data);
-        let message_id = Math.floor(float32Array[0]);
+        const uint32 = new Uint32Array(e.data)
+        let message_id = Math.floor(uint32[0]);
         console.log("message_id: " + message_id);
         let audioBuffer = audioContext_tts.createBuffer(1, float32Array.length, 24000);
         audioBuffer.getChannelData(0).set(float32Array);
