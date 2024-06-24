@@ -109,11 +109,12 @@ class CustomLLMAPI:
                     if response.status_code == 200:
                         for chunk in response.iter_content(1024):
                             logging.info(f"TRANSCRIPTION QUEUE SIZE: {transcription_queue.qsize()}")
-                            transcription_output = transcription_queue.get()
-                            test = transcription_output["prompt"]
-                            logging.info(f"Transciprtion queue contents: {test}")
-                            if transcription_output["prompt"] != "":
-                                break
+                            if transcription_queue.qsize() > 0:
+                                transcription_output = transcription_queue.get()
+                                test = transcription_output["prompt"]
+                                logging.info(f"Transciprtion queue contents: {test}")
+                                if transcription_output["prompt"] != "":
+                                    break
                             llm_response = chunk.decode('utf-8')
                             if not llm_response:
                                 self.eos = True
