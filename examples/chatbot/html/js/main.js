@@ -121,7 +121,7 @@ function initWebSocket() {
     websocket_audio.onmessage = function(e) {
         available_audio_elements++;
         // var data = JSON.parse(e.data);
-        
+        console.log(typeof e.data);
         let message_id = 0;
         let float32Array = new Float32Array(e.data);
         let audioBuffer = audioContext_tts.createBuffer(1, float32Array.length, 24000);
