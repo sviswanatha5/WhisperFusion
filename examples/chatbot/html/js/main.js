@@ -159,7 +159,7 @@ function initWebSocket() {
             
         });
         console.log("Audio_playing: " + audio_playing);
-        if (!audio_playing && blacklist.includes(message_id)) {
+        if (!audio_playing && !blacklist.includes(message_id)) {
             currently_playing = audio_source;
             currently_playing.start();
             console.log("Audio should be playing now");
