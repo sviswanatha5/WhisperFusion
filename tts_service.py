@@ -68,7 +68,7 @@ class WhisperSpeechTTS:
                 pass
             except RuntimeError:
                 logging.info("ENTERED RUNTIMEERROR")
-                pass
+                continue
             except AttributeError as e:
                 logging.error(f"[WhisperSpeech ERROR:] Received {llm_output} from API. Should not be None")
             if self.output_audio is not None:
