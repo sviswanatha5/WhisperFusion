@@ -27,7 +27,7 @@ var audio_sources = [];
 var audio_streams = [];
 var audio_source = null;
 var audio_playing = false;
-var last_audio_id = 0;
+var last_audio_id = null;
 var currently_playing = null;
 
 initWebSocket();
@@ -126,6 +126,7 @@ function initWebSocket() {
         let float32Array = new Float32Array(e.data);
         const uint32 = new Uint32Array(e.data)
         let message_id = Math.floor(uint32[0]);
+        if (last_audio_id == null) last_audio_id = message_id;
         console.log("message_id: " + message_id);
         let audioBuffer = audioContext_tts.createBuffer(1, float32Array.length, 24000);
         audioBuffer.getChannelData(0).set(float32Array);
