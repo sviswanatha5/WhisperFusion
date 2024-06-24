@@ -64,6 +64,7 @@ class WhisperSpeechTTS:
                     self.output_audio = audio.cpu().numpy()
                     self.last_llm_response = llm_output.strip()
             except TimeoutError:
+                logging.info("ENTERED TIMEOUTERROR")
                 pass
             except AttributeError as e:
                 logging.error(f"[WhisperSpeech ERROR:] Received {llm_output} from API. Should not be None")
