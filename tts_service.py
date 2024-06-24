@@ -36,8 +36,8 @@ class WhisperSpeechTTS:
         
             
             llm_response = audio_queue.get()
-            if audio_queue.qsize() != 0:
-                continue
+            # if audio_queue.qsize() != 0:
+            #     continue
             
             # check if this websocket exists
             try:
