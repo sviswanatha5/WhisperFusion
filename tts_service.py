@@ -35,7 +35,7 @@ class WhisperSpeechTTS:
         while True:
         
             
-            llm_response = audio_queue.get()
+            llm_response = audio_queue.get(block=True)
             if audio_queue.qsize() != 0:
                 continue
             
