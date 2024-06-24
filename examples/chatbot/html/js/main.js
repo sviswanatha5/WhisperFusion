@@ -27,7 +27,7 @@ var audio_sources = [];
 var audio_streams = [];
 var audio_source = null;
 var audio_playing = false;
-var last_audio_id = null;
+var current_message_id = null;
 var currently_playing = null;
 
 initWebSocket();
@@ -126,7 +126,7 @@ function initWebSocket() {
         let float32Array = new Float32Array(e.data);
         const uint32 = new Uint32Array(e.data)
         let message_id = Math.floor(uint32[0]);
-        if (last_audio_id == null) last_audio_id = message_id;
+        if (current_message_id == null) current_message_id = message_id;
         console.log("message_id: " + message_id);
         let audioBuffer = audioContext_tts.createBuffer(1, float32Array.length, 24000);
         audioBuffer.getChannelData(0).set(float32Array);
@@ -134,14 +134,6 @@ function initWebSocket() {
         //new_whisper_speech_audio_element("audio-" + available_audio_elements, Math.floor(audioBuffer.duration));
 
        // audio_sources.push(audioBuffer);
-
-        if (last_audio_id != message_id) {
-            currently_playing.stop();
-            audio_streams = [];
-            currently_playing = null;
-            last_audio_id = message_id;
-            audio_playing = false;
-        }
 
         audio_streams.forEach(function(entry) {
             console.log("Entry: " + entry);
@@ -154,7 +146,7 @@ function initWebSocket() {
             console.log("Entered event listener");
             console.log("Audio Streams.length " + audio_streams.length)
             if (audio_streams.length > 0) {
-                currently_playing = audio_streams.shift();
+                currently_playing = audio_streams.shift()[1];
                 currently_playing.start();
                 audio_playing = true
             } else {
@@ -171,7 +163,7 @@ function initWebSocket() {
             audio_playing = true;
         } else {
             console.log(audio_source + " added to queueu");
-            audio_streams.push(audio_source);
+            audio_streams.push([message_id, audio_source]);
         }
         
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
@@ -206,6 +198,12 @@ function initWebSocket() {
         }
       } else if ("segments" in data) {
         if (new_transcription_element_state) {
+            if (audio_playing) {
+                currently_playing.stop();
+                audio_playing = false;
+            }
+            audio_streams = audio_streams.filter(a => a !== current_message_id)
+            current_message_id = null;
             available_transcription_elements = available_transcription_elements + 1;
 
             var img_src = "0.png";
