@@ -50,6 +50,7 @@ class WhisperSpeechTTS:
             llm_output = llm_response["llm_output"]
             logging.info(f"[WhisperSpeech INFO:] LLM Response: {llm_output} \n\n")
             message_id = llm_response["message_id"]
+            logging.info(f"MESSAGE_ID: {message_id}")
             def should_abort():
                 if not audio_queue.empty(): raise TimeoutError()
             # only process if the output updated
