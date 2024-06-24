@@ -73,6 +73,6 @@ class WhisperSpeechTTS:
                 logging.error(f"[WhisperSpeech ERROR:] Received {llm_output} from API. Should not be None")
             if self.output_audio is not None:
                 try:
-                    websocket.send(bytes(message_id) + self.output_audio.tobytes())
+                    websocket.send(message_id.to_bytes(4, 'big') + self.output_audio.tobytes())
                 except Exception as e:
                     logging.error(f"[WhisperSpeech ERROR:] Audio error: {e}")
