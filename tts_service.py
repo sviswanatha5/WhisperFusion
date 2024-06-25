@@ -67,8 +67,8 @@ class WhisperSpeechTTS:
             except TimeoutError:
                 logging.info("ENTERED TIMEOUTERROR")
                 pass
-            except RuntimeError:
-                logging.info("ENTERED RUNTIMEERROR")
+            except RuntimeError as e:
+                logging.info(f"ENTERED RUNTIMEERROR: {e}")
                 continue
             except AttributeError as e:
                 logging.error(f"[WhisperSpeech ERROR:] Received {llm_output} from API. Should not be None")
