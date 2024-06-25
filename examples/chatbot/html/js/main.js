@@ -128,9 +128,10 @@ function initWebSocket() {
         let message_id = Math.floor(uint32[0]);
         console.log("message_id: " + message_id);
         console.log("current_message_id: " + current_message_id);
-        if (current_message_id == null && !blacklist.includes(message_id)) {
+        includes = blacklist.includes(message_id);
+        if (current_message_id == null && !includes) {
             current_message_id = message_id;
-        } else {
+        } else if (includes){
             return
         }
         let audioBuffer = audioContext_tts.createBuffer(1, float32Array.length, 24000);
