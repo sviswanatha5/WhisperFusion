@@ -115,7 +115,7 @@ class TranscriptionServer:
             return
         
         if self.transcriber is None:
-            self.transcriber = WhisperTRTLLM(whisper_tensorrt_path, assets_dir="assets", device="cuda")
+            self.transcriber = WhisperTRTLLM(whisper_tensorrt_path, assets_dir="assets", device="cuda:0")
 
         client = ServeClient(
             websocket,
