@@ -153,7 +153,7 @@ function initWebSocket() {
             } else {
                 currently_playing = null;
                 audio_playing = false;
-                blacklist.push(current_message_id);
+                //blacklist.push(current_message_id);
                 current_message_id = null;
             }
             
