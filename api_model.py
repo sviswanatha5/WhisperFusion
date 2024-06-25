@@ -116,6 +116,8 @@ class CustomLLMAPI:
                                 if transcription_output["prompt"] != "":
                                     break
                             llm_response = chunk.decode('utf-8')
+                            if llm_response == "AI":
+                                break
                             if llm_response == "<|user|>":
                                 self.eos = True
                                 llm_response = ""
