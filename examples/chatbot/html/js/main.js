@@ -128,6 +128,7 @@ function initWebSocket() {
         const uint32 = new Uint32Array(e.data)
         let message_id = Math.floor(uint32[0]);
         console.log("message_id: " + message_id);
+        console.log("current_message_id: " + current_message_id);
         if (current_message_id == null && blacklist.includes(message_id)) {
             current_message_id = message_id;
         } else {
