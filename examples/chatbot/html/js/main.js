@@ -122,14 +122,13 @@ function initWebSocket() {
     websocket_audio.onmessage = function(e) {
         available_audio_elements++;
         // var data = JSON.parse(e.data);
-        console.log("Type of data: " + typeof e.data);
         
         let float32Array = new Float32Array(e.data);
         const uint32 = new Uint32Array(e.data)
         let message_id = Math.floor(uint32[0]);
         console.log("message_id: " + message_id);
         console.log("current_message_id: " + current_message_id);
-        if (current_message_id == null && blacklist.includes(message_id)) {
+        if (current_message_id == null && !blacklist.includes(message_id)) {
             current_message_id = message_id;
         } else {
             return
@@ -141,16 +140,10 @@ function initWebSocket() {
 
        // audio_sources.push(audioBuffer);
 
-        audio_streams.forEach(function(entry) {
-            console.log("Entry: " + entry);
-          });
-
         audio_source = audioContext_tts.createBufferSource();
         audio_source.buffer = audioBuffer;
         audio_source.connect(audioContext_tts.destination);
         audio_source.addEventListener('ended', () => {
-            console.log("Entered event listener");
-            console.log("Audio Streams.length " + audio_streams.length)
             if (audio_streams.length > 0) {
                 currently_playing = audio_streams.shift()[1];
                 currently_playing.start();
@@ -167,7 +160,6 @@ function initWebSocket() {
         if (!audio_playing) {
             currently_playing = audio_source;
             currently_playing.start();
-            console.log("Audio should be playing now");
             audio_playing = true;
         } else {
             console.log(audio_source + " added to queueu");
