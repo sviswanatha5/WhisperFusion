@@ -127,8 +127,12 @@ function initWebSocket() {
         let float32Array = new Float32Array(e.data);
         const uint32 = new Uint32Array(e.data)
         let message_id = Math.floor(uint32[0]);
-        if (current_message_id == null) current_message_id = message_id;
         console.log("message_id: " + message_id);
+        if (current_message_id == null && blacklist.includes(message_id)) {
+            current_message_id = message_id;
+        } else {
+            return
+        }
         let audioBuffer = audioContext_tts.createBuffer(1, float32Array.length, 24000);
         audioBuffer.getChannelData(0).set(float32Array);
 
@@ -159,7 +163,7 @@ function initWebSocket() {
             
         });
         console.log("Audio_playing: " + audio_playing);
-        if (!audio_playing && !blacklist.includes(message_id)) {
+        if (!audio_playing) {
             currently_playing = audio_source;
             currently_playing.start();
             console.log("Audio should be playing now");
@@ -204,10 +208,10 @@ function initWebSocket() {
             if (audio_playing) {
                 currently_playing.stop();
                 audio_playing = false;
+                blacklist.push(current_message_id);
+                audio_streams = audio_streams.filter(a => a[0] !== current_message_id);
+                current_message_id = null;
             }
-            blacklist.push(current_message_id);
-            audio_streams = audio_streams.filter(a => a[0] !== current_message_id);
-            current_message_id = null;
             available_transcription_elements = available_transcription_elements + 1;
 
             var img_src = "0.png";
