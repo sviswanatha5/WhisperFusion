@@ -2,6 +2,7 @@ from fastapi import FastAPI, Query
 from fastapi.responses import StreamingResponse
 from threading import Thread
 from queue import Queue
+from pydantic import BaseModel
 import asyncio
 from transformers import TextStreamer, AutoModelForCausalLM, AutoTokenizer
 
@@ -71,10 +72,16 @@ async def response_generator(query, max_new_tokens=2048, temperature=0.95, top_p
         streamer_queue.task_done()
 
 
+
+class PostRequest(BaseModel):
+    message: str
+
 @app.post('/query-stream/')
-async def stop_stream(message: str):
+async def stop_stream(message: PostRequest):
+    temp = message.message
     streamer.stop_signal.set()
-    print(f"Message Received: {message}")
+    print(f"Message Received: {temp}")
+
 
 
 @app.get('/query-stream/')
