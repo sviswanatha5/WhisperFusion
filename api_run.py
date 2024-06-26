@@ -31,18 +31,15 @@ app = FastAPI()
 
 model, tokenizer = load_model()
 
-streamer_queue = Queue()
-streamer = CustomStreamer(streamer_queue, tokenizer, True)
-
 def format_input(query: str) -> str:
     chat_template = """[gMASK]<sop>
-    <|user|>
+    <user>
     {content}
     """
     formatted_input = chat_template.format(content=query)
     return formatted_input
 
-def start_generation(query, max_new_tokens=2048, temperature=0.95, top_p=0.80, top_k=10):
+def start_generation(query, streamer, max_new_tokens=2048, temperature=0.95, top_p=0.80, top_k=10):
     formatted_query = format_input(query)
     inputs = tokenizer([formatted_query], return_tensors="pt").to("cuda:0")
     input_ids = inputs["input_ids"]
@@ -60,7 +57,9 @@ def start_generation(query, max_new_tokens=2048, temperature=0.95, top_p=0.80, t
     thread.start()
 
 async def response_generator(query, max_new_tokens=2048, temperature=0.95, top_p=0.8, top_k=10):
-    start_generation(query, max_new_tokens, temperature, top_p, top_k)
+    streamer_queue = Queue()
+    streamer = CustomStreamer(streamer_queue, tokenizer, True)
+    start_generation(query, streamer, max_new_tokens, temperature, top_p, top_k)
     while True:
         value = await asyncio.to_thread(streamer_queue.get)
         if value is None:
@@ -81,6 +80,6 @@ async def stream(
     print(f'Generation parameters - max_new_tokens: {max_new_tokens}, temperature: {temperature}, top_p: {top_p}, top_k: {top_k}')
     return StreamingResponse(response_generator(query, max_new_tokens, temperature, top_p, top_k), media_type='text/event-stream')
 
-if name == "main":
+if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="12.1.52.180", port=8001)
