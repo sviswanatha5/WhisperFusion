@@ -37,7 +37,7 @@ model, tokenizer = load_model()
 
 def format_input(query: str) -> str:
     chat_template = """[gMASK]<sop>
-
+    <user>
     {content}
     """
     formatted_input = chat_template.format(content=query)
