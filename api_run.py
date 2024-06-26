@@ -13,8 +13,8 @@ def load_model():
     return model, tokenizer
 
 class CustomStreamer(TextStreamer):
-    def init(self, queue, tokenizer, skip_prompt, **decode_kwargs) -> None:
-        super().init(tokenizer, skip_prompt, **decode_kwargs)
+    def __init__(self, queue, tokenizer, skip_prompt, **decode_kwargs) -> None:
+        super().__init__(tokenizer, skip_prompt, **decode_kwargs)
         self._queue = queue
         self.stop_signal = None
 
@@ -80,6 +80,5 @@ async def stream(
     print(f'Generation parameters - max_new_tokens: {max_new_tokens}, temperature: {temperature}, top_p: {top_p}, top_k: {top_k}')
     return StreamingResponse(response_generator(query, max_new_tokens, temperature, top_p, top_k), media_type='text/event-stream')
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="12.1.52.180", port=8001)
+import uvicorn
+uvicorn.run(app, host="12.1.52.180", port=8001)
