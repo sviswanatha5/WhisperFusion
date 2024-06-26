@@ -66,7 +66,7 @@ async def response_generator(query, max_new_tokens=2048, temperature=0.95, top_p
     start_generation(query, streamer, max_new_tokens, temperature, top_p, top_k)
     while True:
         value = await asyncio.to_thread(streamer_queue.get)
-        if value == streamer.stop_signal:
+        if value == streamer.stop_signal or value == None:
             break
         yield value
         print(value)
