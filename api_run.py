@@ -4,19 +4,23 @@ from threading import Thread
 from queue import Queue
 import asyncio
 from transformers import TextStreamer, AutoModelForCausalLM, AutoTokenizer
+import logging
+
+# Initialize logger
+logging.basicConfig(level=logging.INFO)
 
 def load_model():
     model_name = "THUDM/glm-4-9b-chat"
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
     model = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=True)
-    model.to("cuda") 
+    model.to("cuda")
     return model, tokenizer
 
 class CustomStreamer(TextStreamer):
-    def __init__(self, queue, tokenizer, skip_prompt, **decode_kwargs) -> None:
-        super().__init__(tokenizer, skip_prompt, **decode_kwargs)
+    def init(self, queue, tokenizer, skip_prompt, **decode_kwargs) -> None:
+        super().init(tokenizer, skip_prompt, **decode_kwargs)
         self._queue = queue
-        self.stop_signal = None
+        self.stop_signal = object()
 
     def on_finalized_text(self, text: str, stream_end: bool = False):
         self._queue.put(text)
@@ -33,7 +37,7 @@ model, tokenizer = load_model()
 
 def format_input(query: str) -> str:
     chat_template = """[gMASK]<sop>
-    <user>
+
     {content}
     """
     formatted_input = chat_template.format(content=query)
@@ -62,7 +66,7 @@ async def response_generator(query, max_new_tokens=2048, temperature=0.95, top_p
     start_generation(query, streamer, max_new_tokens, temperature, top_p, top_k)
     while True:
         value = await asyncio.to_thread(streamer_queue.get)
-        if value is None:
+        if value == streamer.stop_signal:
             break
         yield value
         print(value)
@@ -80,5 +84,6 @@ async def stream(
     print(f'Generation parameters - max_new_tokens: {max_new_tokens}, temperature: {temperature}, top_p: {top_p}, top_k: {top_k}')
     return StreamingResponse(response_generator(query, max_new_tokens, temperature, top_p, top_k), media_type='text/event-stream')
 
-import uvicorn
-uvicorn.run(app, host="12.1.52.180", port=8001)
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="12.1.52.180", port=8001)
