@@ -37,7 +37,7 @@ model, tokenizer = load_model()
 
 def format_input(query: str) -> str:
     chat_template = """[gMASK]<sop>
-    <user>
+
     {content}
     """
     formatted_input = chat_template.format(content=query)
@@ -65,12 +65,19 @@ async def response_generator(query, max_new_tokens=2048, temperature=0.95, top_p
     streamer = CustomStreamer(streamer_queue, tokenizer, True)
     start_generation(query, streamer, max_new_tokens, temperature, top_p, top_k)
     while True:
-        value = await asyncio.to_thread(streamer_queue.get)
-        if value == streamer.stop_signal or value == None:
+        try:
+            value = await asyncio.to_thread(streamer_queue.get)
+            if value == streamer.stop_signal:
+                break
+            yield value
+            print(value)
+            streamer_queue.task_done()
+        except asyncio.CancelledError:
+            # Handle cancellation to stop streaming when the client disconnects
             break
-        yield value
-        print(value)
-        streamer_queue.task_done()
+        except Exception as e:
+            logging.error(f"Error in response generator: {e}")
+            break
 
 @app.get('/query-stream/')
 async def stream(
