@@ -449,7 +449,7 @@ class ServeClient:
         }
         
         try:
-            response = requests.post('http://12.1.52.180:8001/query-stream/', data = data)  # Replace with your actual endpoint
+            response = requests.post('http://12.1.52.180:8001/query-stream/', json = data)  # Replace with your actual endpoint
             if response.status_code == 200:
                 logging.info("POST request to stop streaming successful.")
             else:
