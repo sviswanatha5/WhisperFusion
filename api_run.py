@@ -60,6 +60,9 @@ def start_generation(query, max_new_tokens=2048, temperature=0.95, top_p=0.80, t
     )
     thread = Thread(target=model.generate, kwargs=generation_kwargs)
     thread.start()
+    
+    if(streamer.stop_signal.wait()):
+        thread.exit()
 
 async def response_generator(query, max_new_tokens=2048, temperature=0.95, top_p=0.8, top_k=10):
     start_generation(query, max_new_tokens, temperature, top_p, top_k)
