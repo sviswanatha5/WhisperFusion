@@ -16,7 +16,8 @@ class CustomStreamer(TextStreamer):
     def __init__(self, queue, tokenizer, skip_prompt, **decode_kwargs) -> None:
         super().__init__(tokenizer, skip_prompt, **decode_kwargs)
         self._queue = queue
-        self.stop_signal = None
+        #self.stop_signal = None
+        self.stop_signal = asyncio.event()
 
     def on_finalized_text(self, text: str, stream_end: bool = False):
         self._queue.put(text)
@@ -61,7 +62,7 @@ def start_generation(query, max_new_tokens=2048, temperature=0.95, top_p=0.80, t
 
 async def response_generator(query, max_new_tokens=2048, temperature=0.95, top_p=0.8, top_k=10):
     start_generation(query, max_new_tokens, temperature, top_p, top_k)
-    while True:
+    while not streamer.stop_signal.is_set():
         value = await asyncio.to_thread(streamer_queue.get)
         if value is None:
             break
@@ -72,6 +73,7 @@ async def response_generator(query, max_new_tokens=2048, temperature=0.95, top_p
 
 @app.post('/query-stream/')
 async def stop_stream(message: str):
+    streamer.stop_signal.set()
     print(f"Message Received: {message}")
 
 
