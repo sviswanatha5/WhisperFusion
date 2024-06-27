@@ -1,5 +1,8 @@
 # original: https://github.com/snakers4/silero-vad/blob/master/utils_vad.py
 
+import logging
+logging.basicConfig(level = logging.INFO)
+
 import os
 import subprocess
 import torch
@@ -12,6 +15,7 @@ class VoiceActivityDetection():
     def __init__(self, force_onnx_cpu=True):
         print("downloading ONNX model...")
         path = self.download()
+        logging.info(path)
         print("loading session")
 
         opts = onnxruntime.SessionOptions()
@@ -110,7 +114,7 @@ class VoiceActivityDetection():
         # Check if the model file already exists
         if not os.path.exists(model_filename):
             # If it doesn't exist, download the model using wget
-            print("Downloading VAD ONNX model...")
+            logging.info("Downloading VAD ONNX model...")
             try:
                 subprocess.run(["wget", "-O", model_filename, model_url], check=True)
             except subprocess.CalledProcessError:
