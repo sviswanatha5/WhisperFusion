@@ -3,6 +3,7 @@ import time
 import threading
 import json
 import textwrap
+import traceback
 import requests
 import logging
 logging.basicConfig(level = logging.INFO)
@@ -155,6 +156,7 @@ class TranscriptionServer:
 
                 except Exception as e:
                     logging.info("TEST::")
+                    logging.error(traceback.format_exc())
                     logging.error(e)
                     return
                 self.clients[websocket].add_frames(frame_np)
