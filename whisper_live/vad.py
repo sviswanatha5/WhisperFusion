@@ -6,13 +6,16 @@ import torch
 import numpy as np
 import onnxruntime
 
+import logging
+logging.basicConfig(level = logging.INFO)
+
 
 class VoiceActivityDetection():
 
     def __init__(self, force_onnx_cpu=True):
         print("downloading ONNX model...")
         path = self.download()
-        print(path)
+        logging.log("PATH: " + str(path))
         print("loading session")
 
         opts = onnxruntime.SessionOptions()
