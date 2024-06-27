@@ -154,7 +154,7 @@ class TranscriptionServer:
                     self.clients[websocket].set_eos(False)
 
                 except Exception as e:
-                    logging.error(e)
+                    logging.error("TEST" + e)
                     return
                 self.clients[websocket].add_frames(frame_np)
 
