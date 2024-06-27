@@ -15,7 +15,7 @@ class VoiceActivityDetection():
     def __init__(self, force_onnx_cpu=True):
         print("downloading ONNX model...")
         path = self.download()
-        logging.log("PATH: " + str(path))
+        logging.info("PATH: " + str(path))
         print("loading session")
 
         opts = onnxruntime.SessionOptions()
