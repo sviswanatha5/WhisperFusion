@@ -346,7 +346,7 @@ class ServeClient:
             # send the LLM outputs
             try:
                 llm_response = None
-                if self.llm_queue[self.client_uid] is not None:
+                if self.client_uid in self.llm_queue:
                     llm_response = self.llm_queue[self.client_uid].get()
                     self.websocket.send(json.dumps(llm_response))
             except queue.Empty:
