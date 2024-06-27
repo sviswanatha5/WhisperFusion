@@ -123,7 +123,9 @@ class CustomLLMAPI:
                                 llm_response = ""
                             self.infer_time = time.time() - start
                             llm_queue_feed += llm_response
-                            llm_queue.put({
+                            if user not in llm_queue:
+                                llm_queue[user] = Queue()
+                            llm_queue[user].put({
                                     "uid": user,
                                     "llm_output": llm_queue_feed,
                                     "eos": self.eos,

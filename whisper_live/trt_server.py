@@ -346,8 +346,8 @@ class ServeClient:
             # send the LLM outputs
             try:
                 llm_response = None
-                if not self.llm_queue.empty():
-                    llm_response = self.llm_queue.get()
+                if self.llm_queue[self.client_uid] is not None:
+                    llm_response = self.llm_queue[self.client_uid].get()
                     self.websocket.send(json.dumps(llm_response))
             except queue.Empty:
                 pass
@@ -429,7 +429,7 @@ class ServeClient:
             )
         )
     
-    def cleanup(self, transcription_queue, llm_queue):
+    def cleanup(self):
         """
         Perform cleanup tasks before exiting the transcription service.
 
@@ -456,9 +456,9 @@ class ServeClient:
                 logging.error(f"Failed to stop streaming. Status code: {response.status_code}")
         except requests.exceptions.RequestException as e:
             logging.error(f"Error sending POST request: {e}")
-        while not transcription_queue.empty():
-            transcription_queue.get()
-        while not llm_queue.empty():
-            llm_queue.get()
+        while not self.transcription_queue.empty():
+            self.transcription_queue.get()
+        if self.client_uid in self.llm_queue:
+            del self.llm_queue[self.client_uid]
         self.exit = True
         # self.transcriber.destroy()
