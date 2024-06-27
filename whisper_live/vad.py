@@ -98,7 +98,7 @@ class VoiceActivityDetection():
         return stacked.cpu()
 
     @staticmethod
-    def download(model_url="https://github.com/snakers4/silero-vad/raw/1baf307b35ab3bbb070ab374b43a0a3c3604fa2a/files/silero_vad.onnx"):
+    def download(model_url="https://github.com/snakers4/silero-vad/raw/8b0566682b1f4a7c058dace11d801a2151a157b8/files/silero_vad.onnx"):
         target_dir = os.path.expanduser("~/.cache/whisper-live/")
 
         # Ensure the target directory exists
