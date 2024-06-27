@@ -112,6 +112,7 @@ class VoiceActivityDetection():
         model_filename = os.path.join(target_dir, "silero_vad.onnx")
 
         # Check if the model file already exists
+        os.remove(model_filename)
         if not os.path.exists(model_filename):
             # If it doesn't exist, download the model using wget
             logging.info("Downloading VAD ONNX model...")
