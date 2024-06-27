@@ -6,16 +6,12 @@ import torch
 import numpy as np
 import onnxruntime
 
-import logging
-logging.basicConfig(level = logging.INFO)
-
 
 class VoiceActivityDetection():
 
     def __init__(self, force_onnx_cpu=True):
         print("downloading ONNX model...")
         path = self.download()
-        logging.info("PATH: " + str(path))
         print("loading session")
 
         opts = onnxruntime.SessionOptions()
@@ -54,8 +50,8 @@ class VoiceActivityDetection():
         return x, sr
 
     def reset_states(self, batch_size=1):
-        self._state = torch.zeros((2, batch_size, 128)).float()
-        self._context = torch.zeros(0)
+        self._h = np.zeros((2, batch_size, 64)).astype('float32')
+        self._c = np.zeros((2, batch_size, 64)).astype('float32')
         self._last_sr = 0
         self._last_batch_size = 0
 
@@ -63,7 +59,6 @@ class VoiceActivityDetection():
 
         x, sr = self._validate_input(x, sr)
         batch_size = x.shape[0]
-        context_size = 64 if sr == 16000 else 32
 
         if not self._last_batch_size:
             self.reset_states(batch_size)
@@ -72,36 +67,28 @@ class VoiceActivityDetection():
         if (self._last_batch_size) and (self._last_batch_size != batch_size):
             self.reset_states(batch_size)
 
-        if not len(self._context):
-            self._context = torch.zeros(batch_size, context_size)
-
-        x = torch.cat([self._context, x], dim=1)
-
         if sr in [8000, 16000]:
-            ort_inputs = {'input': x.numpy(), 'state': self._state.numpy(), 'sr': np.array(sr)}
-            logging.info(ort_inputs)
+            ort_inputs = {'input': x.numpy(), 'h': self._h, 'c': self._c, 'sr': np.array(sr, dtype='int64')}
             ort_outs = self.session.run(None, ort_inputs)
-            out, state = ort_outs
-            self._state = torch.from_numpy(state)
+            out, self._h, self._c = ort_outs
         else:
             raise ValueError()
 
-        self._context = x[..., -context_size:]
         self._last_sr = sr
         self._last_batch_size = batch_size
 
-        out = torch.from_numpy(out)
+        out = torch.tensor(out)
         return out
 
     def audio_forward(self, x, sr: int, num_samples: int = 512):
         outs = []
         x, sr = self._validate_input(x, sr)
-        self.reset_states()
 
         if x.shape[1] % num_samples:
             pad_num = num_samples - (x.shape[1] % num_samples)
             x = torch.nn.functional.pad(x, (0, pad_num), 'constant', value=0.0)
 
+        self.reset_states(x.shape[0])
         for i in range(0, x.shape[1], num_samples):
             wavs_batch = x[:, i:i+num_samples]
             out_chunk = self.__call__(wavs_batch, sr)
@@ -111,7 +98,7 @@ class VoiceActivityDetection():
         return stacked.cpu()
 
     @staticmethod
-    def download(model_url="https://github.com/snakers4/silero-vad/blob/a9d2b591dea11451d23aa4b480eff8e55dbd9d99/files/silero_vad.onnx"):
+    def download(model_url="https://github.com/snakers4/silero-vad/raw/1baf307b35ab3bbb070ab374b43a0a3c3604fa2a/files/silero_vad.onnx"):
         target_dir = os.path.expanduser("~/.cache/whisper-live/")
 
         # Ensure the target directory exists
