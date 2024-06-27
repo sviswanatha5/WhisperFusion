@@ -53,7 +53,7 @@ if __name__ == "__main__":
     shared_output = manager.list()
     should_send_server_ready = Value(ctypes.c_bool, False)
     transcription_queue = Queue()
-    llm_queue = Queue()
+    llm_queue = manager.dict()
     audio_queue = Queue()
     conversation_history = {}
 

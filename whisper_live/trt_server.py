@@ -175,7 +175,7 @@ class TranscriptionServer:
                 logging.error(e)
                 if self.clients[websocket].client_uid in conversation_history:
                         del conversation_history[self.clients[websocket].client_uid]
-                self.clients[websocket].cleanup(transcription_queue, llm_queue)
+                self.clients[websocket].cleanup()
                 self.clients.pop(websocket)
                 self.clients_start_time.pop(websocket)
                 logging.info("[Whisper INFO:] Connection Closed.")
