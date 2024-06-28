@@ -74,6 +74,7 @@ class CustomLLMAPI:
                 
                 
                 websocket = yield from websockets.connect(self.api_url)
+                print(websocket)
                 try:
                     
                     
