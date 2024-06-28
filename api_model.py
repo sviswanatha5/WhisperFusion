@@ -32,7 +32,7 @@ class CustomLLMAPI:
         self.api_url = api_url
         self.last_prompt = ""
 
-    async def run(self, transcription_queue, audio_queue, llm_queue, conversation_history):
+    def run(self, transcription_queue, audio_queue, llm_queue, conversation_history):
         message_id = 0
         while True:
             transcription_output = transcription_queue.get()
@@ -74,13 +74,13 @@ class CustomLLMAPI:
                 
                 
                 try:
-                    async with websockets.connect(self.api_url) as websocket:
+                    with websockets.connect(self.api_url) as websocket:
                         
-                        await websocket.send(history_prompt)
+                        websocket.send(history_prompt)
                         
                         
                         while True:
-                            llm_response =  await websocket.recv()
+                            llm_response =  websocket.recv()
                             print(f"User {user} received: {llm_response}")
                             
                             logging.info(f"TRANSCRIPTION QUEUE SIZE: {transcription_queue.qsize()}")
