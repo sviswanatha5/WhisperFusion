@@ -350,8 +350,9 @@ class ServeClient:
             try:
                 llm_response = None
                 if self.client_uid in self.llm_queue:
-                    llm_response = self.llm_queue[self.client_uid].pop(0)
-                    self.websocket.send(json.dumps(llm_response))
+                    if len(self.llm_queue[self.client_uid]) > 0:
+                        llm_response = self.llm_queue[self.client_uid].pop(0)
+                        self.websocket.send(json.dumps(llm_response))
             except queue.Empty:
                 pass
             
