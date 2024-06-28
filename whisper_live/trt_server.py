@@ -383,7 +383,7 @@ class ServeClient:
                 input_sample = input_bytes.copy()
                 start = time.time()
                 mel, duration = self.transcriber.log_mel_spectrogram(input_sample)
-                last_segment = self.transcriber.transcribe(mel, device="cuda:1")
+                last_segment = self.transcriber.transcribe(mel)
                 infer_time = time.time() - start
                 self.segment_inference_time.append(infer_time)
 
