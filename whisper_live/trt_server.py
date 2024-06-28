@@ -55,6 +55,7 @@ class TranscriptionServer:
         self.clients_start_time = {}
         self.max_clients = 4
         self.max_connection_time = 600
+        self.transcriber = None
 
     def get_wait_time(self):
         """
@@ -114,8 +115,9 @@ class TranscriptionServer:
             del websocket
             return
         
-        transcriber = WhisperTRTLLM(whisper_tensorrt_path, assets_dir="assets", device="cuda:1")
-        logging.info(f"New transcriber: {transcriber}")
+        if self.transcriber == None:
+            self.transcriber = WhisperTRTLLM(whisper_tensorrt_path, assets_dir="assets", device="cuda:1")
+        logging.info(f"New transcriber: {self.transcriber}")
 
         client = ServeClient(
             websocket,
