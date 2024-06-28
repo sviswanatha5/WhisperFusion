@@ -116,7 +116,7 @@ class TranscriptionServer:
             return
         
         if self.transcriber == None:
-            self.transcriber = WhisperTRTLLM(whisper_tensorrt_path, assets_dir="assets", device="cuda:1")
+            self.transcriber = WhisperTRTLLM(whisper_tensorrt_path, assets_dir="assets", device="cuda")
         logging.info(f"New transcriber: {self.transcriber}")
 
         client = ServeClient(
