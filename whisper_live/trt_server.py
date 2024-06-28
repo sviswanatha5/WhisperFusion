@@ -127,7 +127,7 @@ class TranscriptionServer:
             client_uid=options["uid"],
             transcription_queue=transcription_queue,
             llm_queue=llm_queue,
-            transcriber=transcriber,
+            transcriber=self.transcriber,
         )
 
         self.clients[websocket] = client
