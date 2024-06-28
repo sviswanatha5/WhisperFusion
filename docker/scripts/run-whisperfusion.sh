@@ -10,7 +10,7 @@ cd /root/WhisperFusion
 if [ "$1" != "mistral" ]; then
   exec python3 api_main.py --phi \
                   --whisper_tensorrt_path /root/scratch-space/models/whisper_small_en \
-                  --api_url "ws://12.1.52.172:8001/ws" \
+                  --api_url "ws://12.1.52.180:8001/ws" \
                   
                   
                   
