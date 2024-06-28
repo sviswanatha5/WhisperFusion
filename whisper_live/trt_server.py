@@ -115,6 +115,7 @@ class TranscriptionServer:
             return
         
         transcriber = WhisperTRTLLM(whisper_tensorrt_path, assets_dir="assets", device="cuda")
+        logging.info(f"New transcriber: {transcriber}")
 
         client = ServeClient(
             websocket,
