@@ -167,7 +167,7 @@ class TranscriptionServer:
                     self.clients[websocket].disconnect()
                     logging.warning(f"{self.clients[websocket]} Client disconnected due to overtime.")
                     self.clients[websocket].cleanup()
-                    self.clients.pop(websocket)
+                    del self.clients.pop(websocket)
                     self.clients_start_time.pop(websocket)
                     websocket.close()
                     del websocket
