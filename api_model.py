@@ -6,7 +6,6 @@ import asyncio
 from queue import Queue
 from typing import List, Dict, Any
 from jinja2 import Template
-import multiprocessing
 
 logging.basicConfig(level=logging.INFO)
 
@@ -32,7 +31,7 @@ class CustomLLMAPI:
         self.api_url = api_url
         self.last_prompt = ""
 
-    def run(self, transcription_queue, audio_queue, llm_queue, conversation_history, manager):
+    def run(self, transcription_queue, audio_queue, llm_queue, conversation_history):
         message_id = 0
         while True:
             transcription_output = transcription_queue.get()
@@ -92,13 +91,13 @@ class CustomLLMAPI:
                             self.infer_time = time.time() - start
                             llm_queue_feed += llm_response
                             if user not in llm_queue:
-                                llm_queue[user] = manager.list()
-                            llm_queue[user].append({
+                                llm_queue[user] = []
+                            llm_queue[user] += [{
                                 "uid": user,
                                 "llm_output": llm_queue_feed,
                                 "eos": self.eos,
                                 "latency": self.infer_time
-                            })
+                            }]
                             
                             
                             if any(char in llm_response for char in ['.', '?', '!']):
