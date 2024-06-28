@@ -125,12 +125,13 @@ class CustomLLMAPI:
                             llm_queue_feed += llm_response
                             if user not in llm_queue:
                                 llm_queue[user] = []
-                            llm_queue[user].append({
-                                    "uid": user,
-                                    "llm_output": llm_queue_feed,
-                                    "eos": self.eos,
-                                    "latency": self.infer_time
-                                })
+                            llm_queue_input = {
+                                "uid": user,
+                                "llm_output": llm_queue_feed,
+                                "eos": self.eos,
+                                "latency": self.infer_time
+                            }
+                            llm_queue[user].append(llm_queue_input)
                             
                             
                             if any(char in llm_response for char in ['.', '?', '!']):
