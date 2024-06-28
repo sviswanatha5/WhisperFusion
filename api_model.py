@@ -74,7 +74,10 @@ class CustomLLMAPI:
                 
                 
                 try:
-                    with websockets.connect(self.api_url) as websocket:
+                    sock = websockets.connect(self.api_url)
+                    logging.info(f"SOCKET: {sock}")
+                    
+                    with sock as websocket:
                         
                         websocket.send(history_prompt)
                         
