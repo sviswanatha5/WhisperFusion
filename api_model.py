@@ -3,6 +3,7 @@ import logging
 import time
 import json
 import asyncio
+import websockets
 from queue import Queue
 from typing import List, Dict, Any
 from jinja2 import Template
@@ -75,7 +76,7 @@ class CustomLLMAPI:
                 try:
                     with websockets.connect(self.api_url) as websocket:
                         
-                        websocket.send(query)
+                        websocket.send(history_prompt)
                         
                         
                         while True:
