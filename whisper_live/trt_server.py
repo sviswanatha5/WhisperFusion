@@ -114,7 +114,7 @@ class TranscriptionServer:
             del websocket
             return
         
-        transcriber = WhisperTRTLLM(whisper_tensorrt_path, assets_dir="assets", device="cuda")
+        transcriber = WhisperTRTLLM(whisper_tensorrt_path, assets_dir="assets", device="cuda:1")
         logging.info(f"New transcriber: {transcriber}")
 
         client = ServeClient(
@@ -383,7 +383,7 @@ class ServeClient:
                 input_sample = input_bytes.copy()
                 start = time.time()
                 mel, duration = self.transcriber.log_mel_spectrogram(input_sample)
-                last_segment = self.transcriber.transcribe(mel)
+                last_segment = self.transcriber.transcribe(mel, device="cuda:1")
                 infer_time = time.time() - start
                 self.segment_inference_time.append(infer_time)
 
