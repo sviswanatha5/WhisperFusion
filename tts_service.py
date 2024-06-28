@@ -32,6 +32,7 @@ class WhisperSpeechTTS:
             server.serve_forever()
     def start_whisperspeech_tts(self, websocket, audio_queue=None):
         self.output_audio = None
+        last_message_id = None
         while True:
         
             
@@ -49,8 +50,13 @@ class WhisperSpeechTTS:
             
             llm_output = llm_response["llm_output"]
             logging.info(f"[WhisperSpeech INFO:] LLM Response: {llm_output} \n\n")
+            if not last_message_id:
+                last_message_id = message_id
             message_id = llm_response["message_id"]
             logging.info(f"MESSAGE_ID: {message_id}")
+            if message_id != last_message_id:
+                last_message_id = message_id
+                continue
             def should_abort():
                 if not audio_queue.empty(): raise TimeoutError()
             # only process if the output updated
