@@ -351,9 +351,11 @@ class ServeClient:
                 llm_response = None
                 if self.client_uid in self.llm_queue:
                     if len(self.llm_queue[self.client_uid]) > 0:
-                        llm_response = self.llm_queue[self.client_uid].pop(0)
+                        temp_queue = self.llm_queue[self.client_uid]
+                        llm_response = temp_queue.pop(0)
                         logging.info(f"Popped value: {llm_response}")
                         self.websocket.send(json.dumps(llm_response))
+                        self.llm_queue[self.client_uid] = temp_queue
             except queue.Empty:
                 pass
             
