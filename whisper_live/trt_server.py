@@ -349,6 +349,7 @@ class ServeClient:
             # send the LLM outputs
             try:
                 llm_response = None
+                logging.info(f"TRT SERVER LLM_QUEUE: {self.llm_queue}")
                 if self.client_uid in self.llm_queue:
                     if len(self.llm_queue[self.client_uid]) > 0:
                         llm_response = self.llm_queue[self.client_uid].pop(0)

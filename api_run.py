@@ -2,7 +2,6 @@ from fastapi import FastAPI, Query
 from fastapi.responses import StreamingResponse
 from threading import Thread
 from queue import Queue
-from pydantic import BaseModel
 import asyncio
 from transformers import TextStreamer, AutoModelForCausalLM, AutoTokenizer
 
@@ -17,13 +16,12 @@ class CustomStreamer(TextStreamer):
     def __init__(self, queue, tokenizer, skip_prompt, **decode_kwargs) -> None:
         super().__init__(tokenizer, skip_prompt, **decode_kwargs)
         self._queue = queue
-        self.stop_text = None
-        self.stop_signal = asyncio.Event()
+        self.stop_signal = None
 
     def on_finalized_text(self, text: str, stream_end: bool = False):
         self._queue.put(text)
         if stream_end:
-            self._queue.put(self.stop_text)
+            self._queue.put(self.stop_signal)
 
     def on_new_token(self, token_id: int):
         token = self.tokenizer.decode([token_id], clean_up_tokenization_spaces=True)
@@ -60,32 +58,16 @@ def start_generation(query, max_new_tokens=2048, temperature=0.95, top_p=0.80, t
     )
     thread = Thread(target=model.generate, kwargs=generation_kwargs)
     thread.start()
-    
-    if(streamer.stop_signal.wait()):
-        thread.exit()
 
 async def response_generator(query, max_new_tokens=2048, temperature=0.95, top_p=0.8, top_k=10):
     start_generation(query, max_new_tokens, temperature, top_p, top_k)
-    streamer.stop_signal.clear()
-    while not streamer.stop_signal.is_set():
+    while True:
         value = await asyncio.to_thread(streamer_queue.get)
         if value is None:
             break
         yield value
         print(value)
         streamer_queue.task_done()
-    streamer.stop_signal.clear()
-
-
-
-class PostRequest(BaseModel):
-    message: str
-
-@app.post('/query-stream/')
-async def stop_stream(message: PostRequest):
-    temp = message.message
-    streamer.stop_signal.set()
-    print(f"Message Received: {temp}")
 
 @app.get('/query-stream/')
 async def stream(
