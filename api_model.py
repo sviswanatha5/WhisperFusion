@@ -6,6 +6,7 @@ import asyncio
 from queue import Queue
 from typing import List, Dict, Any
 from jinja2 import Template
+import multiprocessing
 
 logging.basicConfig(level=logging.INFO)
 
@@ -31,40 +32,7 @@ class CustomLLMAPI:
         self.api_url = api_url
         self.last_prompt = ""
 
-    # def query(self, messages: List[Dict[str, Any]], conversation_history: ConversationHistory):
-        
-    #     formatted_prompt = messages[-1]['message']
-    #     history_prompt = conversation_history.get_formatted_history(formatted_prompt)
-    #     params = {
-    #         "query": history_prompt,
-    #         "top_p": 0.8,
-    #         "top_k": 10,
-    #         "temperature": 0.95,
-    #         "max_new_tokens": 2048
-    #     }
-    #     logging.info(f"Sending request to: {self.api_url}")
-    #     logging.info(f"Params: {params}")
-
-    #     with requests.get(self.api_url, params=params, stream=True) as response:
-    #         logging.info(f"Response status code: {response.status_code}")
-    #         if response.status_code == 200:
-    #             response_text = ""
-    #             for chunk in response.iter_content(1024):
-    #                 response_text += chunk.decode('utf-8')
-    #                 logging.info(f"Response chunk: {chunk.decode('utf-8')}")
-    #                 yield response_text
-    #         else:
-    #             return "Error: " + response.text
-
-    # def process_transcription(self, transcription_text, conversation_history: ConversationHistory):
-    #     try:
-    #         llm_response = asyncio.run(self.query([{"speaker": "user", "message": transcription_text}], conversation_history))
-    #         yield llm_response
-    #     except Exception as e:
-    #         logging.error(f"Error querying custom LLM API: {e}")
-    #         return None
-
-    def run(self, transcription_queue, audio_queue, llm_queue, conversation_history):
+    def run(self, transcription_queue, audio_queue, llm_queue, conversation_history, manager):
         message_id = 0
         while True:
             transcription_output = transcription_queue.get()
@@ -124,7 +92,7 @@ class CustomLLMAPI:
                             self.infer_time = time.time() - start
                             llm_queue_feed += llm_response
                             if user not in llm_queue:
-                                llm_queue[user] = []
+                                llm_queue[user] = manager.list()
                             llm_queue[user].append({
                                 "uid": user,
                                 "llm_output": llm_queue_feed,
