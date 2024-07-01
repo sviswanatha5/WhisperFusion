@@ -76,7 +76,7 @@ class CustomLLMAPI:
                 while True: 
                     try:
                         
-                        websocket = websockets.connect(self.api_url)
+                        websocket = websockets.create_connection(self.api_url)
                             
                         logging.info(f"WEBSOCKET: {websocket}")
                     
