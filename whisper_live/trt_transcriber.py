@@ -186,7 +186,7 @@ class WhisperTRTLLM(object):
         world_size = 1
         runtime_rank = tensorrt_llm.mpi_rank()
         runtime_mapping = tensorrt_llm.Mapping(world_size, runtime_rank)
-        torch.cuda.set_device(runtime_rank % runtime_mapping.gpus_per_node)
+        #torch.cuda.set_device(runtime_rank % runtime_mapping.gpus_per_node)
         engine_dir = Path(engine_dir)
 
         self.encoder = WhisperEncoding(engine_dir)
