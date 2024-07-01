@@ -56,7 +56,7 @@ if __name__ == "__main__":
     llm_queue = manager.dict()
     audio_queue = Queue()
     conversation_history = {}
-    events = manager.dict()
+    events = {}
 
     whisper_server = TranscriptionServer()
     whisper_process = multiprocessing.Process(
