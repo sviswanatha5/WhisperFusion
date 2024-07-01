@@ -33,9 +33,9 @@ class CustomLLMAPI:
         self.api_url = api_url
         self.last_prompt = ""
 
-    def query(self, query, user, message_id, llm_queue, audio_queue, conversation_history):
+    def query(self, query, user, message_id, llm_queue, audio_queue, conversation_history, events):
         start = time.time()
-        event = self.events[user]
+        event = events[user]
         total_response = ""
         current_response = ""
         llm_queue_feed = ""
@@ -112,9 +112,8 @@ class CustomLLMAPI:
         self.last_prompt = ""  # Reset last prompt after processing
         self.eos = False  # Reset eos after processing
 
-    def run(self, transcription_queue, audio_queue, llm_queue, conversation_history):
+    def run(self, transcription_queue, audio_queue, llm_queue, conversation_history, events):
         message_id = 0
-        self.events = {}
         while True:
             transcription_output = transcription_queue.get()
             if transcription_queue.qsize() != 0:
@@ -141,9 +140,9 @@ class CustomLLMAPI:
                 logging.info(f"Sending request to: {self.api_url}")
                 
                 if user in self.events:
-                    self.events[user].set()
-                self.events[user] = threading.Event()
-                thread = threading.Thread(target=self.query, args=(query, user, message_id, llm_queue, audio_queue, conversation_history))
+                    events[user].set()
+                events[user] = threading.Event()
+                thread = threading.Thread(target=self.query, args=(query, user, message_id, llm_queue, audio_queue, conversation_history, events))
                 thread.start()
 
                 message_id += 1

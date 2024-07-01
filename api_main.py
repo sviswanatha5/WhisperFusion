@@ -56,6 +56,7 @@ if __name__ == "__main__":
     llm_queue = manager.dict()
     audio_queue = Queue()
     conversation_history = {}
+    events = manager.dict()
 
     whisper_server = TranscriptionServer()
     whisper_process = multiprocessing.Process(
@@ -67,7 +68,8 @@ if __name__ == "__main__":
             llm_queue,
             args.whisper_tensorrt_path,
             should_send_server_ready,
-            conversation_history
+            conversation_history,
+            events
         )
     )
     whisper_process.start()
@@ -76,7 +78,7 @@ if __name__ == "__main__":
 
     llm_process = multiprocessing.Process(
         target=custom_llm_api.run,
-        args=(transcription_queue, audio_queue, llm_queue, conversation_history)
+        args=(transcription_queue, audio_queue, llm_queue, conversation_history, events)
     )
     llm_process.start()
 

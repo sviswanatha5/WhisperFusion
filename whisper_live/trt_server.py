@@ -74,7 +74,7 @@ class TranscriptionServer:
 
         return wait_time / 60
 
-    def recv_audio(self, websocket, transcription_queue=None, llm_queue=None, whisper_tensorrt_path=None, should_send_server_ready=None, conversation_history=None):
+    def recv_audio(self, websocket, transcription_queue=None, llm_queue=None, whisper_tensorrt_path=None, should_send_server_ready=None, conversation_history=None, events=None):
         """
         Receive audio chunks from a client in an infinite loop.
         
@@ -179,14 +179,17 @@ class TranscriptionServer:
                 logging.error(e)
                 if self.clients[websocket].client_uid in conversation_history:
                         del conversation_history[self.clients[websocket].client_uid]
+                logging.info(f"Refernces to transcriber: {gc.get_referrers(self.clients[websocket].transcriber)}")
+                events[self.client[websocket].client_uid].set()
                 self.clients[websocket].cleanup()
+                del self.clients[websocket]
                 self.clients.pop(websocket)
                 self.clients_start_time.pop(websocket)
                 logging.info("[Whisper INFO:] Connection Closed.")
                 del websocket
                 break
 
-    def run(self, host, port=9090, transcription_queue=None, llm_queue=None, whisper_tensorrt_path=None, should_send_server_ready=None, conversation_history=None):
+    def run(self, host, port=9090, transcription_queue=None, llm_queue=None, whisper_tensorrt_path=None, should_send_server_ready=None, conversation_history=None, events=None):
         """
         Run the transcription server.
 
@@ -206,6 +209,7 @@ class TranscriptionServer:
                 whisper_tensorrt_path=whisper_tensorrt_path,
                 should_send_server_ready=should_send_server_ready,
                 conversation_history=conversation_history,
+                events=events
             ),
             host,
             port
