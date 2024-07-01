@@ -93,6 +93,7 @@ class CustomLLMAPI:
                     current_response += llm_response
                     
                 logging.info(f"RESPONSE: {llm_response}")
+            ws.close()
                     
         except Exception as e:
             logging.info(f"Exception: {e}")
