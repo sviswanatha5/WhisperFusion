@@ -73,78 +73,80 @@ class CustomLLMAPI:
                 logging.info(f"Params: {params}")
                 
                 
-                
-                try:
-                    
-                    with websockets.connect(self.api_url) as websocket:
+                while True: 
+                    try:
+                        
+                        websocket = websockets.connect(self.api_url)
+                            
+                        logging.info(f"WEBSOCKET: {websocket}")
                     
                         
                         websocket.send(history_prompt)
                         
                         
-                        while True:
-                            llm_response =  websocket.recv()
-                            print(f"User {user} received: {llm_response}")
-                            
-                            logging.info(f"TRANSCRIPTION QUEUE SIZE: {transcription_queue.qsize()}")
-                            if transcription_queue.qsize() > 0:
-                                transcription_output = transcription_queue.get()
-                                test = transcription_output["prompt"]
-                                logging.info(f"Transciprtion queue contents: {test}")
-                                if transcription_output["prompt"] != "":
-                                    break
-                            
-                            if llm_response == "AI":
+                        
+                        llm_response =  websocket.recv()
+                        print(f"User {user} received: {llm_response}")
+                        
+                        logging.info(f"TRANSCRIPTION QUEUE SIZE: {transcription_queue.qsize()}")
+                        if transcription_queue.qsize() > 0:
+                            transcription_output = transcription_queue.get()
+                            test = transcription_output["prompt"]
+                            logging.info(f"Transciprtion queue contents: {test}")
+                            if transcription_output["prompt"] != "":
                                 break
-                            if llm_response == "<|user|>":
-                                self.eos = True
-                                llm_response = ""
-                            self.infer_time = time.time() - start
-                            llm_queue_feed += llm_response
-                            if user not in llm_queue:
-                                llm_queue[user] = []
-                            llm_queue[user] += [{
-                                "uid": user,
-                                "llm_output": llm_queue_feed,
-                                "eos": self.eos,
-                                "latency": self.infer_time
-                            }]
-                            
-                            
-                            if any(char in llm_response for char in ['.', '?', '!']):
+                        
+                        if llm_response == "AI":
+                            break
+                        if llm_response == "<|user|>":
+                            self.eos = True
+                            llm_response = ""
+                        self.infer_time = time.time() - start
+                        llm_queue_feed += llm_response
+                        if user not in llm_queue:
+                            llm_queue[user] = []
+                        llm_queue[user] += [{
+                            "uid": user,
+                            "llm_output": llm_queue_feed,
+                            "eos": self.eos,
+                            "latency": self.infer_time
+                        }]
+                        
+                        
+                        if any(char in llm_response for char in ['.', '?', '!']):
 
-                                if "." in llm_response:
-                                    split = llm_response.split(".")
-                                    punc = "."
-                                elif "?" in llm_response:
-                                    split = llm_response.split("?")
-                                    punc = "?"
-                                else:
-                                    split = llm_response.split("!")
-                                    punc = "!"
-
-                                
-
-                                current_response += split[0] + punc
-                                logging.info(f"CURRENT RESPONSE: {current_response}")
-                                audio_queue.put({"message_id": message_id, "llm_output": current_response})
-                                logging.info(f"SENT TO AUDIO_QUEUE: {current_response}")
-                                total_response += current_response
-
-                                current_response = ""
+                            if "." in llm_response:
+                                split = llm_response.split(".")
+                                punc = "."
+                            elif "?" in llm_response:
+                                split = llm_response.split("?")
+                                punc = "?"
                             else:
-                                current_response += llm_response
-                                
-                            logging.info(f"RESPONSE: {llm_response}")
+                                split = llm_response.split("!")
+                                punc = "!"
+
                             
+
+                            current_response += split[0] + punc
+                            logging.info(f"CURRENT RESPONSE: {current_response}")
+                            audio_queue.put({"message_id": message_id, "llm_output": current_response})
+                            logging.info(f"SENT TO AUDIO_QUEUE: {current_response}")
+                            total_response += current_response
+
+                            current_response = ""
+                        else:
+                            current_response += llm_response
                             
-                            
-                            
-                            #file.write(response + "\n")
-                                #file.flush()  
-                except websockets.ConnectionClosed:
-                    print(f"User {user_id} connection closed, retrying...")
-                    #await asyncio.sleep(2)  
+                        logging.info(f"RESPONSE: {llm_response}")
+                        
+                        
+                        
+                        
+                        #file.write(response + "\n")
+                            #file.flush()  
+                    except websockets.ConnectionClosed:
+                        print(f"User {user_id} connection closed, retrying...")
+                        #await asyncio.sleep(2)  
 
                 # with requests.get(self.api_url, params=params, stream=True) as response:
                 #     logging.info(f"Response status code: {response.status_code}")
