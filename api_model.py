@@ -33,7 +33,7 @@ class CustomLLMAPI:
         self.api_url = api_url
         self.last_prompt = ""
 
-    def query(self, query, user, message_id, llm_queue, audio_queue, conversation_history, event):
+    def query(self, query, user, message_id, llm_queue, audio_queue, conversation_history):
         start = time.time()
         event = self.events[user]
         total_response = ""
