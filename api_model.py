@@ -3,7 +3,7 @@ import logging
 import time
 import json
 import asyncio
-import websockets
+import websocket
 from queue import Queue
 from typing import List, Dict, Any
 from jinja2 import Template
@@ -76,16 +76,18 @@ class CustomLLMAPI:
                 while True: 
                     try:
                         
-                        websocket = websockets.create_connection(self.api_url)
+                        ws = websocket.WebSocket()
                             
-                        logging.info(f"WEBSOCKET: {websocket}")
+                        logging.info(f"WEBSOCKET: {ws}")
+                        
+                        ws.connect(self.api_url)
                     
                         
-                        websocket.send(history_prompt)
+                        ws.send(history_prompt)
                         
                         
                         
-                        llm_response =  websocket.recv()
+                        llm_response =  ws.recv()
                         print(f"User {user} received: {llm_response}")
                         
                         logging.info(f"TRANSCRIPTION QUEUE SIZE: {transcription_queue.qsize()}")
@@ -144,7 +146,7 @@ class CustomLLMAPI:
                         
                         #file.write(response + "\n")
                             #file.flush()  
-                    except websockets.ConnectionClosed:
+                    except websocket.ConnectionClosed:
                         print(f"User {user_id} connection closed, retrying...")
                         #await asyncio.sleep(2)  
 
