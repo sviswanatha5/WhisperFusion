@@ -142,7 +142,7 @@ class CustomLLMAPI:
                             #file.flush()  
                     except Exception as e:
                         logging.info(f"Exception: {e}")
-                        print(f"User {user_id} connection closed, retrying...")
+                        #print(f"User {user_id} connection closed, retrying...")
                         #await asyncio.sleep(2)  
 
                 # with requests.get(self.api_url, params=params, stream=True) as response:
