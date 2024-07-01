@@ -3,7 +3,7 @@ import websockets
 import json
 
 async def user_interaction(user_id, query, output_file):
-    uri = "ws://12.1.52.172:8001/ws"
+    uri = "ws://12.1.52.177:8001/ws"
     while True:
         try:
             async with websockets.connect(uri) as websocket:
