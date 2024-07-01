@@ -6,6 +6,7 @@ import textwrap
 import traceback
 import requests
 import logging
+import gc
 logging.basicConfig(level = logging.INFO)
 
 from websockets.sync.server import serve
@@ -166,6 +167,7 @@ class TranscriptionServer:
                         del conversation_history[self.clients[websocket].client_uid]
                     self.clients[websocket].disconnect()
                     logging.warning(f"{self.clients[websocket]} Client disconnected due to overtime.")
+                    logging.info(f"Refernces to transcriber: {gc.get_referrers(self.clients[websocket].transcriber)}")
                     self.clients[websocket].cleanup()
                     del self.clients[websocket]
                     self.clients_start_time.pop(websocket)
