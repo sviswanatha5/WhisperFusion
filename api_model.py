@@ -75,7 +75,7 @@ class CustomLLMAPI:
                         #logging.info(f"WEBSOCKET: {ws}")
                         
                         ws.connect(self.api_url)
-                        ws.send(query)
+                        ws.send(json.dumps(query))
                         
                         logging.info(f"SUCCESSFULY SENT: {query}")
                         
