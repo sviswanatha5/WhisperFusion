@@ -133,7 +133,7 @@ class CustomLLMAPI:
                 if user in self.events:
                     self.events[user].set()
                 self.events[user] = threading.Event()
-                thread = threading.Thread(self.query, args=(query, user, message_id, llm_queue, audio_queue, conversation_history))
+                thread = threading.Thread(target=self.query, args=(query, user, message_id, llm_queue, audio_queue, conversation_history))
                 thread.start()
 
                 message_id += 1
