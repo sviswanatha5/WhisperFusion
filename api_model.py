@@ -140,7 +140,7 @@ class CustomLLMAPI:
                         
                         #file.write(response + "\n")
                             #file.flush()  
-                    except e:
+                    except Exception as e:
                         logging.info(f"Exception: {e}")
                         print(f"User {user_id} connection closed, retrying...")
                         #await asyncio.sleep(2)  
