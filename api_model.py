@@ -122,8 +122,8 @@ class CustomLLMAPI:
             prompt = transcription_output['prompt'].strip()
             user = transcription_output['uid']
 
-            if transcription_output and user in self.events:
-                self.events[user].set()
+            if transcription_output and user in events:
+                events[user].set()
             
             if user not in conversation_history:
                 conversation_history[user] = ConversationHistory()
@@ -139,7 +139,7 @@ class CustomLLMAPI:
                 query = [{"role": "user", "content": history_prompt}]
                 logging.info(f"Sending request to: {self.api_url}")
                 
-                if user in self.events:
+                if user in events:
                     events[user].set()
                 events[user] = threading.Event()
                 thread = threading.Thread(target=self.query, args=(query, user, message_id, llm_queue, audio_queue, conversation_history, events))
