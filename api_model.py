@@ -66,23 +66,23 @@ class CustomLLMAPI:
                 query = [{"role": "user", "content": history_prompt}]
                 logging.info(f"Sending request to: {self.api_url}")
                 
-                
-                while True: 
-                    try:
+                 
+                try:
+                    
+                    ws = websocket.WebSocket()
                         
-                        ws = websocket.WebSocket()
-                            
-                        #logging.info(f"WEBSOCKET: {ws}")
-                        
-                        ws.connect(self.api_url)
-                        ws.send(json.dumps(query))
-                        
-                        logging.info(f"SUCCESSFULY SENT: {query}")
-                        
-                        
-                        
+                    #logging.info(f"WEBSOCKET: {ws}")
+                    
+                    ws.connect(self.api_url)
+                    ws.send(json.dumps(query))
+                    
+                    logging.info(f"SUCCESSFULY SENT: {query}")
+                    
+                    while True:
+                    
                         llm_response =  ws.recv()
-                        print(f"User {user} received: {llm_response}")
+                        if not llm_response:
+                            continue
                         
                         logging.info(f"TRANSCRIPTION QUEUE SIZE: {transcription_queue.qsize()}")
                         if transcription_queue.qsize() > 0:
@@ -92,8 +92,6 @@ class CustomLLMAPI:
                             if transcription_output["prompt"] != "":
                                 break
                         
-                        if llm_response == "AI":
-                            break
                         if llm_response == "<|user|>":
                             self.eos = True
                             llm_response = ""
@@ -134,16 +132,16 @@ class CustomLLMAPI:
                             current_response += llm_response
                             
                         logging.info(f"RESPONSE: {llm_response}")
-                        
-                        
-                        
-                        
-                        #file.write(response + "\n")
-                            #file.flush()  
-                    except Exception as e:
-                        logging.info(f"Exception: {e}")
-                        #print(f"User {user_id} connection closed, retrying...")
-                        #await asyncio.sleep(2)  
+                    
+                    
+                    
+                    
+                    #file.write(response + "\n")
+                        #file.flush()  
+                except Exception as e:
+                    logging.info(f"Exception: {e}")
+                    #print(f"User {user_id} connection closed, retrying...")
+                    #await asyncio.sleep(2)  
 
                 # with requests.get(self.api_url, params=params, stream=True) as response:
                 #     logging.info(f"Response status code: {response.status_code}")
