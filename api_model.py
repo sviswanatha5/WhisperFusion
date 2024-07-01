@@ -62,15 +62,9 @@ class CustomLLMAPI:
                 messages = [{"speaker": "user", "message": prompt}]
                 formatted_prompt = messages[-1]['message']
                 history_prompt = conversation_history[user].get_formatted_history(formatted_prompt)
-                params = {
-                    "query": history_prompt,
-                    "top_p": 0.9,
-                    "top_k": 10,
-                    "temperature": 0.3,
-                    "max_new_tokens": 1024
-                }
+                
+                query = [{"role": "user", "content": history_prompt}]
                 logging.info(f"Sending request to: {self.api_url}")
-                logging.info(f"Params: {params}")
                 
                 
                 while True: 
@@ -78,12 +72,12 @@ class CustomLLMAPI:
                         
                         ws = websocket.WebSocket()
                             
-                        logging.info(f"WEBSOCKET: {ws}")
+                        #logging.info(f"WEBSOCKET: {ws}")
                         
                         ws.connect(self.api_url)
-                    
+                        ws.send(query)
                         
-                        ws.send(history_prompt)
+                        logging.info(f"SUCCESSFULY SENT: {query}")
                         
                         
                         
