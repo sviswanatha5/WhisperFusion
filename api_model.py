@@ -93,7 +93,16 @@ class CustomLLMAPI:
                     current_response += llm_response
                     
                 logging.info(f"RESPONSE: {llm_response}")
+                
             ws.close()
+            if self.eos == False:
+                self.eos = True
+                llm_queue[user] += [{
+                    "uid": user,
+                    "llm_output": llm_queue_feed,
+                    "eos": self.eos,
+                    "latency": self.infer_time
+                }]
                     
         except Exception as e:
             logging.info(f"Exception: {e}")
