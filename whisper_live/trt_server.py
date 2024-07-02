@@ -183,6 +183,7 @@ class TranscriptionServer:
                 uid = self.clients[websocket].client_uid
                 logging.info(f"self.clients[websocket].client_uid: {uid}")
                 logging.info(f"EVENTS: {events}")
+                logging.info(f"events ID: {hex(id(events))}")
                 if self.clients[websocket].client_uid in events:
                     logging.info("Setting client UID on refresh")
                     events[self.clients[websocket].client_uid].set()

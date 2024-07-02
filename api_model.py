@@ -144,6 +144,8 @@ class CustomLLMAPI:
                     events[user].set()
                 events[user] = threading.Event()
                 logging.info(f"Added to events: {events}")
+                logging.info(f"added events ID: {hex(id(events))}")
+
                 thread = threading.Thread(target=self.query, args=(query, user, message_id, llm_queue, audio_queue, conversation_history, events))
                 thread.start()
 
