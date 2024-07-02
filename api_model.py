@@ -50,6 +50,7 @@ class CustomLLMAPI:
             logging.info(f"SUCCESSFULY SENT: {query}")
             
             while not event.is_set():
+                logging.info(f"Event {event} status: {event.is_set()}")
             
                 llm_response =  ws.recv()
                 if not llm_response:

@@ -181,6 +181,7 @@ class TranscriptionServer:
                         del conversation_history[self.clients[websocket].client_uid]
                 logging.info(f"Refernces to transcriber: {gc.get_referrers(self.clients[websocket].transcriber)}")
                 if self.clients[websocket].client_uid in events:
+                    logging.info("Setting client UID on refresh")
                     events[self.clients[websocket].client_uid].set()
                 self.clients[websocket].cleanup()
                 del self.clients[websocket]
