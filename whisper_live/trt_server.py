@@ -452,22 +452,6 @@ class ServeClient:
         """
         logging.info("Cleaning up.")
         
-        logging.info("Making API POST request.")
-        
-        message = "<STOP>"
-        
-        data = {
-            "message": message
-        }
-        
-        try:
-            response = requests.post('http://12.1.52.180:8001/query-stream/', json = data)  # Replace with your actual endpoint
-            if response.status_code == 200:
-                logging.info("POST request to stop streaming successful.")
-            else:
-                logging.error(f"Failed to stop streaming. Status code: {response.status_code}")
-        except requests.exceptions.RequestException as e:
-            logging.error(f"Error sending POST request: {e}")
         while not self.transcription_queue.empty():
             self.transcription_queue.get()
         if self.client_uid in self.llm_queue:
