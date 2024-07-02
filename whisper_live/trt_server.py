@@ -180,7 +180,8 @@ class TranscriptionServer:
                 if self.clients[websocket].client_uid in conversation_history:
                         del conversation_history[self.clients[websocket].client_uid]
                 logging.info(f"Refernces to transcriber: {gc.get_referrers(self.clients[websocket].transcriber)}")
-                events[self.clients[websocket].client_uid].set()
+                if self.clients[websocket].client_uid in events:
+                    events[self.clients[websocket].client_uid].set()
                 self.clients[websocket].cleanup()
                 del self.clients[websocket]
                 self.clients_start_time.pop(websocket)
