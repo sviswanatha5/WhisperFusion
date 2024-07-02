@@ -136,7 +136,7 @@ class CustomLLMAPI:
                 formatted_prompt = messages[-1]['message']
                 history_prompt = conversation_history[user].get_formatted_history(formatted_prompt)
                 
-                query = [{"role": "user", "content": prompt}]
+                query = [{"role": "user", "content": history_prompt}]
                 logging.info(f"Sending request to: {self.api_url}")
                 
                 if user in events:
