@@ -184,7 +184,6 @@ class TranscriptionServer:
                     events[self.clients[websocket].client_uid].set()
                 self.clients[websocket].cleanup()
                 del self.clients[websocket]
-                self.clients.pop(websocket)
                 self.clients_start_time.pop(websocket)
                 logging.info("[Whisper INFO:] Connection Closed.")
                 del websocket
