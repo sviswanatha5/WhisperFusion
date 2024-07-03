@@ -131,18 +131,19 @@ class CustomLLMAPI:
     def run(self, websocket):
         message_id = 0
         while True:
-            try:
-                websocket.recv()
-            except Exception as e:
-                if user in self.events:
-                    self.events[user].set()
-                pass
+
             transcription_output = self.transcription_queue.get()
             if self.transcription_queue.qsize() != 0:
                 continue
             
             prompt = transcription_output['prompt'].strip()
             user = transcription_output['uid']
+
+            # try:
+            #     websocket.recv()
+            # except Exception as e:
+            #     if user in self.events:
+            #         self.events[user].set()
 
             if transcription_output and user in self.events:
                 self.events[user].set()
