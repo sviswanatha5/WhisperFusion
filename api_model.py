@@ -41,6 +41,7 @@ class CustomLLMAPI:
         self.llm_queue = llm_queue
         self.conversation_history = conversation_history
         self.events = {}
+        logging.info(f"STARTING LLM WEBSOCKET")
         with serve(
             functools.partial(self.run, ), 
             host, port
