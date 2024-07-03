@@ -78,8 +78,8 @@ if __name__ == "__main__":
     custom_llm_api = CustomLLMAPI(api_url=args.api_url)    
 
     llm_process = multiprocessing.Process(
-        target=custom_llm_api.run,
-        args=(transcription_queue, audio_queue, llm_queue, conversation_history, events)
+        target=custom_llm_api.start,
+        args=("0.0.0.0", 7123, transcription_queue, audio_queue, llm_queue, conversation_history)
     )
     llm_process.start()
 
