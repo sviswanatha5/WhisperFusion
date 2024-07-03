@@ -7,6 +7,7 @@ import sys
 import functools
 import ctypes
 import requests
+from collections import defaultdict
 
 from multiprocessing import Process, Manager, Value, Queue
 
@@ -56,7 +57,7 @@ if __name__ == "__main__":
     llm_queue = manager.dict()
     audio_queue = Queue()
     conversation_history = {}
-    events = dict()
+    events = defaultdict()
 
     whisper_server = TranscriptionServer()
     whisper_process = multiprocessing.Process(
