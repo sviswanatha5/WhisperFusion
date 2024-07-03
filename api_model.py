@@ -132,10 +132,11 @@ class CustomLLMAPI:
         message_id = 0
         while True:
             try:
-                websocket.ping()
+                websocket.recv()
             except Exception as e:
                 if user in self.events:
                     self.events[user].set()
+                pass
             transcription_output = self.transcription_queue.get()
             if self.transcription_queue.qsize() != 0:
                 continue
