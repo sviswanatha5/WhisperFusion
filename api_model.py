@@ -42,7 +42,7 @@ class CustomLLMAPI:
         self.conversation_history = conversation_history
         self.events = {}
         with serve(
-            functools.partial(self.run), 
+            functools.partial(self.run, ), 
             host, port
             ) as server:
             server.serve_forever()
