@@ -1,5 +1,6 @@
 let websocket_uri = 'ws://' + window.location.host + '/transcription';
 let websocket_audio_uri = 'ws://' + window.location.host + '/audio';
+let websocket_llm_uri = 'ws://' + window.location.host + '/llm'
 
 let bufferSize = 4096,
     AudioContext,
@@ -247,6 +248,11 @@ function initWebSocket() {
 
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
+
+    websocket = new WebSocket(websocket_llm_uri);
+    websocket.binaryType = "arraybuffer";
+
+    console.log("LLm websocket created");
 }
 
 function new_transcription_element(speaker_name, speaker_avatar) {

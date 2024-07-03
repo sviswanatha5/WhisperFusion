@@ -17,6 +17,7 @@ services:
     ports:
       - "8888:8888"
       - "6006:6006"
+      - "7123:7123"
     deploy:
       resources:
         reservations:

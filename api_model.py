@@ -1,11 +1,13 @@
 import requests
 import logging
+import functools
 import time
 import json
 import asyncio
 import threading
 import websocket
 from queue import Queue
+from websockets.sync.server import serve
 from typing import List, Dict, Any
 from jinja2 import Template
 
@@ -33,9 +35,21 @@ class CustomLLMAPI:
         self.api_url = api_url
         self.last_prompt = ""
 
-    def query(self, query, user, message_id, llm_queue, audio_queue, conversation_history, events):
+    def start(self, host, port, transcription_queue, audio_queue, llm_queue, conversation_history):
+        self.transcription_queue = transcription_queue
+        self.audio_queue = audio_queue
+        self.llm_queue = llm_queue
+        self.conversation_history = conversation_history
+        self.events = {}
+        with serve(
+            functools.partial(self.run), 
+            host, port
+            ) as server:
+            server.serve_forever()
+
+    def query(self, query, user, message_id):
         start = time.time()
-        event = events[user]
+        event = self.events[user]
         total_response = ""
         current_response = ""
         llm_queue_feed = ""
@@ -61,9 +75,9 @@ class CustomLLMAPI:
                     event.set()
                 self.infer_time = time.time() - start
                 llm_queue_feed += llm_response
-                if user not in llm_queue:
-                    llm_queue[user] = []
-                llm_queue[user] += [{
+                if user not in self.llm_queue:
+                    self.llm_queue[user] = []
+                self.llm_queue[user] += [{
                     "uid": user,
                     "llm_output": llm_queue_feed,
                     "eos": self.eos,
@@ -85,7 +99,7 @@ class CustomLLMAPI:
 
                     current_response += split[0] + punc
                     logging.info(f"CURRENT RESPONSE: {current_response}")
-                    audio_queue.put({"message_id": message_id, "llm_output": current_response})
+                    self.audio_queue.put({"message_id": message_id, "llm_output": current_response})
                     logging.info(f"SENT TO AUDIO_QUEUE: {current_response}")
                     total_response += current_response
 
@@ -98,7 +112,7 @@ class CustomLLMAPI:
             ws.close()
             if self.eos == False:
                 self.eos = True
-                llm_queue[user] += [{
+                self.llm_queue[user] += [{
                     "uid": user,
                     "llm_output": llm_queue_feed,
                     "eos": self.eos,
@@ -109,44 +123,43 @@ class CustomLLMAPI:
             logging.info(f"Exception: {e}")
             pass
                 
-        conversation_history[user].add_to_history("assistant", total_response)
+        self.conversation_history[user].add_to_history("assistant", total_response)
         self.last_prompt = ""  # Reset last prompt after processing
         self.eos = False  # Reset eos after processing
 
-    def run(self, transcription_queue, audio_queue, llm_queue, conversation_history, events):
+    def run(self):
         message_id = 0
         while True:
-            transcription_output = transcription_queue.get()
-            if transcription_queue.qsize() != 0:
+            transcription_output = self.transcription_queue.get()
+            if self.transcription_queue.qsize() != 0:
                 continue
             
             prompt = transcription_output['prompt'].strip()
             user = transcription_output['uid']
 
-            if transcription_output and user in events:
-                events[user].set()
+            if transcription_output and user in self.events:
+                self.events[user].set()
             
-            if user not in conversation_history:
-                conversation_history[user] = ConversationHistory()
+            if user not in self.conversation_history:
+                self.conversation_history[user] = ConversationHistory()
                 
             if self.last_prompt == prompt and transcription_output["eos"]:
                 self.eos = False
-                conversation_history[user].add_to_history("user", prompt)
+                self.conversation_history[user].add_to_history("user", prompt)
                 
                 messages = [{"speaker": "user", "message": prompt}]
                 formatted_prompt = messages[-1]['message']
-                history_prompt = conversation_history[user].get_formatted_history(formatted_prompt)
+                history_prompt = self.conversation_history[user].get_formatted_history(formatted_prompt)
                 
                 query = [{"role": "user", "content": history_prompt}]
                 logging.info(f"Sending request to: {self.api_url}")
                 
-                if user in events:
-                    events[user].set()
-                events[user] = threading.Event()
-                logging.info(f"Added to events: {events}")
-                logging.info(f"added events ID: {hex(id(events))}")
+                if user in self.events:
+                    self.events[user].set()
+                self.events[user] = threading.Event()
+                logging.info(f"Added to events: {self.events}")
 
-                thread = threading.Thread(target=self.query, args=(query, user, message_id, llm_queue, audio_queue, conversation_history, events))
+                thread = threading.Thread(target=self.query, args=(query, user, message_id, self.events))
                 thread.start()
 
                 message_id += 1
