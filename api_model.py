@@ -43,7 +43,7 @@ class CustomLLMAPI:
         self.events = {}
         logging.info(f"STARTING LLM WEBSOCKET")
         with serve(
-            functools.partial(self.run, ), 
+            self.run, 
             host, port
             ) as server:
             server.serve_forever()
