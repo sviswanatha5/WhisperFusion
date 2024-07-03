@@ -131,6 +131,10 @@ class CustomLLMAPI:
     def run(self, websocket):
         message_id = 0
         while True:
+            try:
+                websocket.ping()
+            except Exception as e:
+                self.events[user].set()
             transcription_output = self.transcription_queue.get()
             if self.transcription_queue.qsize() != 0:
                 continue
@@ -160,7 +164,7 @@ class CustomLLMAPI:
                 self.events[user] = threading.Event()
                 logging.info(f"Added to events: {self.events}")
 
-                thread = threading.Thread(target=self.query, args=(query, user, message_id, self.events))
+                thread = threading.Thread(target=self.query, args=(query, user, message_id))
                 thread.start()
 
                 message_id += 1
