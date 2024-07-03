@@ -128,7 +128,7 @@ class CustomLLMAPI:
         self.last_prompt = ""  # Reset last prompt after processing
         self.eos = False  # Reset eos after processing
 
-    def run(self):
+    def run(self, websocket):
         message_id = 0
         while True:
             transcription_output = self.transcription_queue.get()
