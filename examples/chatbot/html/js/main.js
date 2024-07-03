@@ -249,8 +249,8 @@ function initWebSocket() {
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 
-    websocket = new WebSocket(websocket_llm_uri);
-    websocket.binaryType = "arraybuffer";
+    websocket_llm = new WebSocket(websocket_llm_uri);
+    websocket_llm.binaryType = "arraybuffer";
 
     console.log("LLm websocket created");
 }
