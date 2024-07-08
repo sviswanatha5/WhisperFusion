@@ -1,86 +1,170 @@
-from fastapi import FastAPI, Query
-from fastapi.responses import StreamingResponse
-from threading import Thread
-from queue import Queue
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 import asyncio
-from transformers import TextStreamer, AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import logging
+import torch
+import os
+from queue import Queue, Empty
+from transformers import TextStreamer
+import threading
 
-def load_model():
-    model_name = "THUDM/glm-4-9b-chat"
-    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
-    model = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=True)
-    model.to("cuda") 
-    return model, tokenizer
+class StopSignal:
+    """A unique class to signal stopping the streamer."""
+    pass
 
 class CustomStreamer(TextStreamer):
-    def __init__(self, queue, tokenizer, skip_prompt, **decode_kwargs) -> None:
+    def __init__(self, tokenizer, skip_prompt=False, **decode_kwargs):
         super().__init__(tokenizer, skip_prompt, **decode_kwargs)
-        self._queue = queue
-        self.stop_signal = None
+        self.queue = Queue()
+        self.last_token_pos = 0  # Track the last token position
+        self.stop_event = threading.Event()  # Event to signal stop
+        self.first = False
 
-    def on_finalized_text(self, text: str, stream_end: bool = False):
-        self._queue.put(text)
-        if stream_end:
-            self._queue.put(self.stop_signal)
+    def put(self, value):
+        if self.stop_event.is_set():
+            raise StopIteration("Stop signal received, stopping streamer.")
+        
+        super().put(value)
+        
+        # Process new tokens from the last processed position
+        new_tokens = self.token_cache[self.last_token_pos:]
+        new_text = self.tokenizer.decode(new_tokens, **self.decode_kwargs)
+        
+        # Update the last token position
+        self.last_token_pos = len(self.token_cache)
+        
+        # Add new text to the queue
+        if new_text:
+            if not self.first:
+                self.first = True
+            else:
+                self.queue.put(new_text)
 
-    def on_new_token(self, token_id: int):
-        token = self.tokenizer.decode([token_id], clean_up_tokenization_spaces=True)
-        self._queue.put(token)
+    def end(self):
+        super().end()
+        # Spam the queue with stop signals to ensure it is processed
+        for _ in range(10):
+            self.queue.put(StopSignal())  # End of stream signal
 
+    def get_from_queue(self):
+        try:
+            item = self.queue.get_nowait()
+            if isinstance(item, StopSignal):
+                raise StopIteration("Stop signal received, stopping streamer.")
+            return item
+        except Empty:
+            return None
+
+    def set_stop(self):
+        self.stop_event.set()
+        self.queue.put(StopSignal())  # Ensure the queue processes the stop signal
+# Initialize FastAPI app
 app = FastAPI()
 
-model, tokenizer = load_model()
+# Load model and tokenizer
+model = None
+tokenizer = None
 
-streamer_queue = Queue()
-streamer = CustomStreamer(streamer_queue, tokenizer, True)
+async def load_model():
+    global model, tokenizer
+    model_name = "internlm/internlm2_5-7b-chat-1m"
+    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+    model = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=True)
+    model.to("cuda")
+    model.eval()
+    logging.info("Model loaded successfully")
+
+@app.on_event("startup")
+async def startup_event():
+    await load_model()
+
+import json
 
 def format_input(query: str) -> str:
-    chat_template = """[gMASK]<sop>
-    <|user|>
-    {content}
+    # Parse the JSON string to extract the content
+    messages = json.loads(query)
+    
+    # Assuming the content is always in the 'content' field of the first message
+    content = messages[0]['content']
+    
+    chat_template = """
+    当您完成回复后，您必须在句子末尾添加 <|user|> 以表明您已完成。您只能使用英文字母回复。禁止您使用特殊字符。禁止您使用表情符号。
+    
+    {content} 
+    
     """
-    formatted_input = chat_template.format(content=query)
-    return formatted_input
+    return chat_template.format(content=content)
 
-def start_generation(query, max_new_tokens=2048, temperature=0.95, top_p=0.80, top_k=10):
-    formatted_query = format_input(query)
-    inputs = tokenizer([formatted_query], return_tensors="pt").to("cuda:0")
-    input_ids = inputs["input_ids"]
-    attention_mask = inputs["attention_mask"]
-    generation_kwargs = dict(
-        input_ids=input_ids,
-        attention_mask=attention_mask,
-        streamer=streamer,
-        max_new_tokens=max_new_tokens,
-        temperature=temperature,
-        top_p=top_p,
-        top_k=top_k
-    )
-    thread = Thread(target=model.generate, kwargs=generation_kwargs)
-    thread.start()
+# Set CUDA_LAUNCH_BLOCKING for debugging
+os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
 
-async def response_generator(query, max_new_tokens=2048, temperature=0.95, top_p=0.8, top_k=10):
-    start_generation(query, max_new_tokens, temperature, top_p, top_k)
+async def generate_text(query: str, streamer: CustomStreamer, stop_event: asyncio.Event):
+    input_ids = tokenizer(format_input(query), return_tensors="pt").input_ids.to("cuda")
+    attention_mask = torch.ones_like(input_ids).to("cuda")
+
+    generation_kwargs = {
+        "input_ids": input_ids,
+        "attention_mask": attention_mask,
+        "max_new_tokens": 2048,
+        "temperature": 0.1,
+        "top_p": 0.1,
+        "top_k": 1,
+        "do_sample": True,
+        "streamer": streamer
+    }
+    
+    def stock_checking_generate():
+        try:
+            for _ in model.generate(**generation_kwargs):
+                if stop_event.is_set():
+                    logging.info("Stop event set, stopping generation.")
+                    break
+        except StopIteration:
+            logging.info("Generation stopped by stop signal.")
+            return
+
+    await asyncio.to_thread(stock_checking_generate)
+
+async def send_text_from_queue(websocket: WebSocket, streamer: CustomStreamer):
+    # Possible here.
     while True:
-        value = await asyncio.to_thread(streamer_queue.get)
-        if value is None:
+        try:
+            token = streamer.get_from_queue()
+            if token:
+                await websocket.send_text(token)
+            else:
+                await asyncio.sleep(0.2)
+        except StopIteration:
+            logging.info("Stopping text sending due to stop signal.")
             break
-        yield value
-        print(value)
-        streamer_queue.task_done()
 
-@app.get('/query-stream/')
-async def stream(
-    query: str,
-    max_new_tokens: int = Query(2048, description="Maximum number of new tokens to generate."),
-    temperature: float = Query(0.95, description="Temperature for the generation."),
-    top_p: float = Query(0.8, description="Top-p (nucleus sampling) parameter."),
-    top_k: int = Query(10, description="Top-k parameter.")
-):
-    print(f'Query received: {query}')
-    print(f'Generation parameters - max_new_tokens: {max_new_tokens}, temperature: {temperature}, top_p: {top_p}, top_k: {top_k}')
-    return StreamingResponse(response_generator(query, max_new_tokens, temperature, top_p, top_k), media_type='text/event-stream')
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    stop_event = asyncio.Event()
+    try:
+        logging.info("Connection open")
+        while True:
+            data = await websocket.receive_text()
+            logging.info(f"Received query: {data}")
+            streamer = CustomStreamer(tokenizer)
+            
+            await asyncio.gather(
+                generate_text(data, streamer, stop_event),
+                send_text_from_queue(websocket, streamer)
+            )
+    except WebSocketDisconnect:
+        logging.info("Client disconnected")
+        stop_event.set()
+        streamer.set_stop()  # Signal to stop the streamer
+    except Exception as e:
+        logging.error(f"Error: {e}")
+        stop_event.set()
+        streamer.set_stop()  # Signal to stop the streamer
+    finally:
+        # await websocket.close()  # Ensure the WebSocket is closed
+        logging.info("WebSocket connection closed")
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="12.1.52.180", port=8001)
+    uvicorn.run(app, host="12.1.52.176", port=8001)

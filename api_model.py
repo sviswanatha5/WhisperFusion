@@ -72,7 +72,7 @@ class CustomLLMAPI:
                 llm_response =  ws.recv()
                 if not llm_response:
                     continue
-                if llm_response == "<|user|>":
+                if "<|user|>" in llm_response:
                     self.eos = True
                     llm_response = ""
                     event.set()
@@ -141,11 +141,11 @@ class CustomLLMAPI:
             prompt = transcription_output['prompt'].strip()
             user = transcription_output['uid']
 
-            # try:
-            #     websocket.recv()
-            # except Exception as e:
-            #     if user in self.events:
-            #         self.events[user].set()
+            try:
+                websocket.recv()
+            except Exception as e:
+                if user in self.events:
+                    self.events[user].set()
 
             if transcription_output and user in self.events:
                 self.events[user].set()
