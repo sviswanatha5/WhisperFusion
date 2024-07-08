@@ -61,7 +61,7 @@ class CustomLLMAPI:
                                     
             ws.connect(self.api_url)
             logging.info(f"WEBSOCKET CONNECTED")
-            while not client_socket.sock.connected:
+            while not client_socket.socket.connected:
                 time.sleep(0.1)
             ws.send(json.dumps(query))
             
