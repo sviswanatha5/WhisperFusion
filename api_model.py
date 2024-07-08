@@ -58,12 +58,11 @@ class CustomLLMAPI:
 
         try:
             ws = websocket.WebSocket()
-            logging.info(f"WEBSOCKET: {websocket}")
                                     
             ws.connect(self.api_url)
             logging.info(f"WEBSOCKET CONNECTED")
-            pong = client_socket.ping()
-            pong.wait()
+            while not client_socket.sock.connected:
+                time.sleep(0.1)
             ws.send(json.dumps(query))
             
             logging.info(f"SUCCESSFULY SENT: {query}")
