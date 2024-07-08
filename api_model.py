@@ -62,10 +62,13 @@ class CustomLLMAPI:
                                     
             ws.connect(self.api_url)
             logging.info(f"WEBSOCKET CONNECTED")
+            while not client_socket.connected:
+                client_socket.recv()
+            logging.info("Passed while loop")
             ws.send(json.dumps(query))
             
             logging.info(f"SUCCESSFULY SENT: {query}")
-            client_socket.send("")
+
             while not event.is_set():
                 try:
                     client_socket.send("")
