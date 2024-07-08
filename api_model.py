@@ -61,8 +61,6 @@ class CustomLLMAPI:
                                     
             ws.connect(self.api_url)
             logging.info(f"WEBSOCKET CONNECTED")
-            while not client_socket.socket.connected:
-                time.sleep(0.1)
             ws.send(json.dumps(query))
             
             logging.info(f"SUCCESSFULY SENT: {query}")
@@ -148,6 +146,9 @@ class CustomLLMAPI:
             prompt = transcription_output['prompt'].strip()
             user = transcription_output['uid']
 
+            options = websocket.recv()
+            options = json.loads(options)
+            logging.info(f"open with options: {options}")
             # try:
             #     websocket.send("")
             #     logging.info(f"Received websocket at : {websocket}")

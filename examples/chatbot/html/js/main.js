@@ -251,6 +251,13 @@ function initWebSocket() {
 
     websocket_llm = new WebSocket(websocket_llm_uri);
     websocket_llm.binaryType = "arraybuffer";
+    websocket_llm.onopen = function() {
+        console.log("Connected to server.");
+        
+        websocket.send(JSON.stringify({
+          uid: generateUUID(),
+        }));
+      }
 
     console.log("LLm websocket created");
 }
