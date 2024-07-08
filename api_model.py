@@ -67,6 +67,8 @@ class CustomLLMAPI:
             logging.info(f"SUCCESSFULY SENT: {query}")
             
             while not event.is_set() or client_socket.connected:
+                logging.info(f"Other option: {client_socket.conencted}")
+                logging.info(f"Client socket: {client_socket.socket.is_connected}")
                 client_socket.send("")
                 logging.info(f"Event {event} status: {event.is_set()}")
             
