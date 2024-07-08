@@ -142,7 +142,7 @@ class CustomLLMAPI:
             user = transcription_output['uid']
 
             try:
-                websocket.recv()
+                websocket.send("")
                 logging.info(f"Received websocket at : {websocket}")
             except Exception as e:
                 logging.info("Connection to websocket closed")
