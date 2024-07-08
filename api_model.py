@@ -62,16 +62,13 @@ class CustomLLMAPI:
                                     
             ws.connect(self.api_url)
             logging.info(f"WEBSOCKET CONNECTED")
-            while not client_socket.connected:
-                client_socket.recv()
-            logging.info("Passed while loop")
             ws.send(json.dumps(query))
             
             logging.info(f"SUCCESSFULY SENT: {query}")
 
             while not event.is_set():
                 try:
-                    client_socket.send("")
+                    client_socket.recv(timeout=0)
                 except Exception as e:
                     logging.info(f"EXCEPTION: {e}")
                     logging.info("Encountered refresh")
@@ -86,6 +83,7 @@ class CustomLLMAPI:
                 if "<|user|>" in llm_queue_feed:
                     self.eos = True
                     event.set()
+                    llm_queue_feed.removesuffix("<|user|>")
                 if user not in self.llm_queue:
                     self.llm_queue[user] = []
                 self.llm_queue[user] += [{
