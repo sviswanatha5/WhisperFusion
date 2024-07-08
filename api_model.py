@@ -65,7 +65,7 @@ class CustomLLMAPI:
             ws.send(json.dumps(query))
             
             logging.info(f"SUCCESSFULY SENT: {query}")
-            
+            client_socket.send("")
             while not event.is_set():
                 try:
                     client_socket.send("")
