@@ -69,7 +69,7 @@ class CustomLLMAPI:
                 try:
                     client_socket.send("")
                 except Exception as e:
-                    logging.info(f"EXCEPTION: {e}")
+                    logging.exception(e)
                     logging.info("Encountered refresh")
                     event.set()
                 logging.info(f"Event {event} status: {event.is_set()}")
