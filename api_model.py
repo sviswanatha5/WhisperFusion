@@ -179,6 +179,8 @@ class CustomLLMAPI:
                 self.events[user] = threading.Event()
                 logging.info(f"Added to events: {self.events}")
 
+                logging.info(f"Websocket: {websocket}")
+
                 thread = threading.Thread(target=self.query, args=(query, user, message_id, websocket))
                 thread.start()
                 logging.info("Continuing")
