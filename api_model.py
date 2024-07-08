@@ -48,7 +48,7 @@ class CustomLLMAPI:
             ) as server:
             server.serve_forever()
 
-    def query(self, query, user, message_id):
+    def query(self, query, user, message_id, client_socket):
         start = time.time()
         event = self.events[user]
         total_response = ""
@@ -66,7 +66,8 @@ class CustomLLMAPI:
             
             logging.info(f"SUCCESSFULY SENT: {query}")
             
-            while not event.is_set():
+            while not event.is_set() or client_socket.connected:
+                client_socket.send("")
                 logging.info(f"Event {event} status: {event.is_set()}")
             
                 llm_response =  ws.recv()
@@ -125,7 +126,7 @@ class CustomLLMAPI:
             logging.info(f"Exception: {e}")
             pass
                 
-        self.conversation_history[user].add_to_history("assistant", total_response)
+        self.conversation_history[user].add_to_history("assistant", llm_queue_feed)
         self.last_prompt = ""  # Reset last prompt after processing
         self.eos = False  # Reset eos after processing
 
@@ -140,13 +141,13 @@ class CustomLLMAPI:
             prompt = transcription_output['prompt'].strip()
             user = transcription_output['uid']
 
-            try:
-                websocket.send("")
-                logging.info(f"Received websocket at : {websocket}")
-            except Exception as e:
-                logging.info("Connection to websocket closed")
-                if user in self.events:
-                    self.events[user].set()
+            # try:
+            #     websocket.send("")
+            #     logging.info(f"Received websocket at : {websocket}")
+            # except Exception as e:
+            #     logging.info("Connection to websocket closed")
+            #     if user in self.events:
+            #         self.events[user].set()
 
             if transcription_output and user in self.events:
                 self.events[user].set()
