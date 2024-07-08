@@ -67,7 +67,7 @@ class CustomLLMAPI:
 
             while not event.is_set():
                 try:
-                    logging.info(f"CLIENT SOCKET: {client_socket}, type: {type(client_socket)}")
+                    logging.info(f"CLIENT SOCKET: {client_socket.id}, type: {type(client_socket)}")
                     client_socket.send("")
                 except Exception as e:
                     logging.exception(e)
@@ -182,7 +182,7 @@ class CustomLLMAPI:
                 self.events[user] = threading.Event()
                 logging.info(f"Added to events: {self.events}")
 
-                logging.info(f"Websocket: {websocket}")
+                logging.info(f"Websocket: {websocket.id}")
 
                 thread = threading.Thread(target=self.query, args=(query, user, message_id, websocket))
                 thread.start()
