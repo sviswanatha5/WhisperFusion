@@ -62,6 +62,8 @@ class CustomLLMAPI:
                                     
             ws.connect(self.api_url)
             logging.info(f"WEBSOCKET CONNECTED")
+            pong = client_socket.ping()
+            pong.wait()
             ws.send(json.dumps(query))
             
             logging.info(f"SUCCESSFULY SENT: {query}")
