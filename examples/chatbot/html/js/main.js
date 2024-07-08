@@ -254,7 +254,7 @@ function initWebSocket() {
     websocket_llm.onopen = function() {
         console.log("Connected to server.");
         
-        websocket.send(JSON.stringify({
+        websocket_llm.send(JSON.stringify({
           uid: generateUUID(),
         }));
       }
