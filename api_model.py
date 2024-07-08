@@ -136,6 +136,7 @@ class CustomLLMAPI:
         self.eos = False  # Reset eos after processing
 
     def run(self, websocket):
+        options = None
         message_id = 0
         while True:
 
@@ -146,9 +147,10 @@ class CustomLLMAPI:
             prompt = transcription_output['prompt'].strip()
             user = transcription_output['uid']
 
-            options = websocket.recv()
-            options = json.loads(options)
-            logging.info(f"open with options: {options}")
+            if not options:
+                options = websocket.recv()
+                options = json.loads(options)
+                logging.info(f"open with options: {options}")
             # try:
             #     websocket.send("")
             #     logging.info(f"Received websocket at : {websocket}")
