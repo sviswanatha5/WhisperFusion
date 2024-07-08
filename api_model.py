@@ -67,6 +67,7 @@ class CustomLLMAPI:
 
             while not event.is_set():
                 try:
+                    logging.info(f"CLIENT SOCKET: {client_socket}, type: {type(client_socket)}")
                     client_socket.send("")
                 except Exception as e:
                     logging.exception(e)
