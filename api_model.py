@@ -72,12 +72,11 @@ class CustomLLMAPI:
                 llm_response =  ws.recv()
                 if not llm_response:
                     continue
-                if "<|user|>" in llm_response:
-                    self.eos = True
-                    llm_response = ""
-                    event.set()
                 self.infer_time = time.time() - start
                 llm_queue_feed += llm_response
+                if "<|user|>" in llm_queue_feed:
+                    self.eos = True
+                    event.set()
                 if user not in self.llm_queue:
                     self.llm_queue[user] = []
                 self.llm_queue[user] += [{
@@ -173,6 +172,7 @@ class CustomLLMAPI:
 
                 thread = threading.Thread(target=self.query, args=(query, user, message_id))
                 thread.start()
+                logging.info("Continuing")
 
                 message_id += 1
             
