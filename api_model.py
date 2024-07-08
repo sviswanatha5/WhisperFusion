@@ -143,7 +143,9 @@ class CustomLLMAPI:
 
             try:
                 websocket.recv()
+                logging.info(f"Received websocket at : {websocket}")
             except Exception as e:
+                logging.info("Connection to websocket closed")
                 if user in self.events:
                     self.events[user].set()
 
