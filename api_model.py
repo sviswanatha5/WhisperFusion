@@ -70,6 +70,7 @@ class CustomLLMAPI:
             while flag:
                 try:
                     logging.info(f"CLIENT SOCKET: {client_socket.id}, type: {type(client_socket)}")
+                    client_socket.ping()
                     client_socket.send("")
                 except Exception as e:
                     logging.exception(e)
@@ -166,6 +167,9 @@ class CustomLLMAPI:
 
             # if transcription_output and user in self.events:
             #     self.events[user].set()
+            
+            websocket.ping()
++           logging.info(f"Websocket: {websocket.id}")
             
             if user not in self.conversation_history:
                 self.conversation_history[user] = ConversationHistory()
