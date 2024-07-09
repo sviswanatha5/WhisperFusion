@@ -64,15 +64,17 @@ class CustomLLMAPI:
             ws.send(json.dumps(query))
             
             logging.info(f"SUCCESSFULY SENT: {query}")
+            
+            flag = True
 
-            while True:
+            while flag:
                 try:
                     logging.info(f"CLIENT SOCKET: {client_socket.id}, type: {type(client_socket)}")
                     client_socket.send("")
                 except Exception as e:
                     logging.exception(e)
                     logging.info("Encountered refresh")
-                    break
+                    flag = False
                     #event.set()
                 #logging.info(f"Event {event} status: {event.is_set()}")
             
@@ -83,6 +85,7 @@ class CustomLLMAPI:
                 llm_queue_feed += llm_response
                 if "<|user|>" in llm_queue_feed:
                     self.eos = True
+                    flag = False
                     #event.set()
                     llm_queue_feed.removesuffix("<|user|>")
                 if user not in self.llm_queue:
