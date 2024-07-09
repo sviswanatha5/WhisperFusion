@@ -186,7 +186,7 @@ class CustomLLMAPI:
                 # self.events[user] = threading.Event()
                 #logging.info(f"Added to events: {self.events}")
                 
-                websocket.send("ping", opcode=websocket.ABNF.OPCODE_PING)
+                websocket.ping()
 
                 logging.info(f"Websocket: {websocket.id}")
 
