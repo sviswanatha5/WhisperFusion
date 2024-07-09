@@ -84,10 +84,10 @@ class CustomLLMAPI:
                     continue
                 self.infer_time = time.time() - start
                 llm_queue_feed += llm_response
-                if "<|user|>" in llm_queue_feed:
+                if "<|user|><|im_end|>" in llm_queue_feed:
                     self.eos = True
-                    flag = False
-                    #event.set()
+                    # flag = False
+                    event.set()
                     llm_queue_feed.removesuffix("<|user|>")
                 if user not in self.llm_queue:
                     self.llm_queue[user] = []
