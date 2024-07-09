@@ -169,7 +169,9 @@ class CustomLLMAPI:
             #     self.events[user].set()
             
             websocket.ping()
-+           logging.info(f"Websocket: {websocket.id}")
+            logging.info(f"Websocket: {websocket.id}")
+            
+            
             
             if user not in self.conversation_history:
                 self.conversation_history[user] = ConversationHistory()
