@@ -50,7 +50,7 @@ class CustomLLMAPI:
 
     def query(self, query, user, message_id, client_socket):
         start = time.time()
-        event = self.events[user]
+        #event = self.events[user]
         total_response = ""
         current_response = ""
         llm_queue_feed = ""
@@ -65,15 +65,16 @@ class CustomLLMAPI:
             
             logging.info(f"SUCCESSFULY SENT: {query}")
 
-            while not event.is_set():
+            while True:
                 try:
                     logging.info(f"CLIENT SOCKET: {client_socket.id}, type: {type(client_socket)}")
                     client_socket.send("")
                 except Exception as e:
                     logging.exception(e)
                     logging.info("Encountered refresh")
-                    event.set()
-                logging.info(f"Event {event} status: {event.is_set()}")
+                    break
+                    #event.set()
+                #logging.info(f"Event {event} status: {event.is_set()}")
             
                 llm_response =  ws.recv()
                 if not llm_response:
@@ -82,7 +83,7 @@ class CustomLLMAPI:
                 llm_queue_feed += llm_response
                 if "<|user|>" in llm_queue_feed:
                     self.eos = True
-                    event.set()
+                    #event.set()
                     llm_queue_feed.removesuffix("<|user|>")
                 if user not in self.llm_queue:
                     self.llm_queue[user] = []
@@ -160,8 +161,8 @@ class CustomLLMAPI:
             #     if user in self.events:
             #         self.events[user].set()
 
-            if transcription_output and user in self.events:
-                self.events[user].set()
+            # if transcription_output and user in self.events:
+            #     self.events[user].set()
             
             if user not in self.conversation_history:
                 self.conversation_history[user] = ConversationHistory()
@@ -177,15 +178,16 @@ class CustomLLMAPI:
                 query = [{"role": "user", "content": history_prompt}]
                 logging.info(f"Sending request to: {self.api_url}")
                 
-                if user in self.events:
-                    self.events[user].set()
-                self.events[user] = threading.Event()
-                logging.info(f"Added to events: {self.events}")
+                # if user in self.events:
+                #     self.events[user].set()
+                # self.events[user] = threading.Event()
+                #logging.info(f"Added to events: {self.events}")
 
                 logging.info(f"Websocket: {websocket.id}")
 
-                thread = threading.Thread(target=self.query, args=(query, user, message_id, websocket))
-                thread.start()
+                # thread = threading.Thread(target=self.query, args=(query, user, message_id, websocket))
+                # thread.start()
+                self.query(query, user, message_id, websocket)
                 logging.info("Continuing")
 
                 message_id += 1
