@@ -50,7 +50,7 @@ class CustomLLMAPI:
 
     def query(self, query, user, message_id, client_socket):
         start = time.time()
-        #event = self.events[user]
+        event = self.events[user]
         total_response = ""
         current_response = ""
         llm_queue_feed = ""
@@ -67,7 +67,7 @@ class CustomLLMAPI:
             
             flag = True
 
-            while flag:
+            while not event.is_set():
                 try:
                     logging.info(f"CLIENT SOCKET: {client_socket.id}, type: {type(client_socket)}")
                     client_socket.ping()
@@ -75,8 +75,8 @@ class CustomLLMAPI:
                 except Exception as e:
                     logging.exception(e)
                     logging.info("Encountered refresh")
-                    flag = False
-                    #event.set()
+                    # flag = False
+                    event.set()
                 #logging.info(f"Event {event} status: {event.is_set()}")
             
                 llm_response =  ws.recv()
@@ -165,8 +165,8 @@ class CustomLLMAPI:
             #     if user in self.events:
             #         self.events[user].set()
 
-            # if transcription_output and user in self.events:
-            #     self.events[user].set()
+            if transcription_output and user in self.events:
+                self.events[user].set()
             
             websocket.ping()
             logging.info(f"Websocket: {websocket.id}")
@@ -187,18 +187,18 @@ class CustomLLMAPI:
                 query = [{"role": "user", "content": history_prompt}]
                 logging.info(f"Sending request to: {self.api_url}")
                 
-                # if user in self.events:
-                #     self.events[user].set()
-                # self.events[user] = threading.Event()
-                #logging.info(f"Added to events: {self.events}")
+                if user in self.events:
+                    self.events[user].set()
+                self.events[user] = threading.Event()
+                logging.info(f"Added to events: {self.events}")
                 
                 websocket.ping()
 
                 logging.info(f"Websocket: {websocket.id}")
 
-                # thread = threading.Thread(target=self.query, args=(query, user, message_id, websocket))
-                # thread.start()
-                self.query(query, user, message_id, websocket)
+                thread = threading.Thread(target=self.query, args=(query, user, message_id, websocket))
+                thread.start()
+                # self.query(query, user, message_id, websocket)
                 logging.info("Continuing")
 
                 message_id += 1
