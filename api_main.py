@@ -55,7 +55,7 @@ if __name__ == "__main__":
     should_send_server_ready = Value(ctypes.c_bool, False)
     transcription_queue = Queue()
     llm_queue = manager.dict()
-    audio_queue = Queue()
+    audio_queue = manager.dict()
     conversation_history = {}
     events = defaultdict()
 

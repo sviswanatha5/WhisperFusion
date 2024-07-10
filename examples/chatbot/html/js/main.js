@@ -31,6 +31,7 @@ var audio_playing = false;
 var current_message_id = null;
 var currently_playing = null;
 var blacklist = [];
+var uid = null;
 
 initWebSocket();
 
@@ -115,10 +116,94 @@ function stopRecording() {
 }
 
 function initWebSocket() {
+
+    websocket = new WebSocket(websocket_uri);
+    websocket.binaryType = "arraybuffer";
+
+    console.log("Websocket created.");
+  
+    websocket.onopen = function() {
+      console.log("Connected to server.");
+      
+      websocket.send(JSON.stringify({
+        uid: generateUUID(),
+        multilingual: false,
+        language: "en",
+        task: "transcribe"
+      }));
+    }
+    
+    websocket.onclose = function(e) {
+      console.log("Connection closed (" + e.code + ").");
+    }
+    
+    websocket.onmessage = function(e) {
+      var data = JSON.parse(e.data);
+
+      if ("message" in data) {
+        if (data["message"] == "SERVER_READY") {
+            uid = data["uid"];
+            server_state = 1;
+        }
+      } else if ("segments" in data) {
+        if (new_transcription_element_state) {
+            if (audio_playing) {
+                currently_playing.stop();
+                audio_playing = false;
+                blacklist.push(current_message_id);
+                audio_streams = audio_streams.filter(a => a[0] !== current_message_id);
+                current_message_id = null;
+            }
+            available_transcription_elements = available_transcription_elements + 1;
+
+            var img_src = "0.png";
+            if (you_name.toLowerCase() == "marcus") {
+                you_name = "Marcus";
+                img_src = "0.png";
+            } else if (you_name.toLowerCase() == "vineet") {
+                you_name = "Vineet";
+                img_src = "1.png";
+            } else if (you_name.toLowerCase() == "jakub") {
+                you_name = "Jakub";
+                img_src = "2.png";
+            }
+
+            new_transcription_element(you_name, img_src);
+            new_text_element("<p>" +  data["segments"][0].text + "</p>", "transcription-" + available_transcription_elements);
+            new_transcription_element_state = false;
+        }
+        document.getElementById("transcription-" + available_transcription_elements).innerHTML = "<p>" + data["segments"][0].text + "</p>"; 
+
+        if (data["eos"] == true) {
+            new_transcription_element_state = true;
+        }
+      } else if ("llm_output" in data) {
+
+            if (new_llm_element_state) {
+                available_llm_elements = available_llm_elements + 1
+                new_transcription_element("AT&T GLM-4", "1.png");
+                new_text_element("<p>" +  data["llm_output"] + "</p>", "llm-" + available_llm_elements);
+                new_llm_element_state = false;
+            }
+            document.getElementById("llm-" + available_llm_elements).innerHTML = "<p>" + data["llm_output"] + "</p>"; 
+
+            if (data["eos"] == true) {
+                new_llm_element_state = true;
+            }
+      }
+
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+
     websocket_audio = new WebSocket(websocket_audio_uri);
     websocket_audio.binaryType = "arraybuffer";
 
-    websocket_audio.onopen = function() { }
+    websocket_audio.onopen = function() { 
+        websocket.send(JSON.stringify({
+            id: uid
+          }));
+    }
     websocket_audio.onclose = function(e) { }
     websocket_audio.onmessage = function(e) {
         available_audio_elements++;
@@ -170,83 +255,6 @@ function initWebSocket() {
         }
         
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    }
-
-    websocket = new WebSocket(websocket_uri);
-    websocket.binaryType = "arraybuffer";
-
-    console.log("Websocket created.");
-  
-    websocket.onopen = function() {
-      console.log("Connected to server.");
-      
-      websocket.send(JSON.stringify({
-        uid: generateUUID(),
-        multilingual: false,
-        language: "en",
-        task: "transcribe"
-      }));
-    }
-    
-    websocket.onclose = function(e) {
-      console.log("Connection closed (" + e.code + ").");
-    }
-    
-    websocket.onmessage = function(e) {
-      var data = JSON.parse(e.data);
-
-      if ("message" in data) {
-        if (data["message"] == "SERVER_READY") {
-            server_state = 1;
-        }
-      } else if ("segments" in data) {
-        if (new_transcription_element_state) {
-            if (audio_playing) {
-                currently_playing.stop();
-                audio_playing = false;
-                blacklist.push(current_message_id);
-                audio_streams = audio_streams.filter(a => a[0] !== current_message_id);
-                current_message_id = null;
-            }
-            available_transcription_elements = available_transcription_elements + 1;
-
-            var img_src = "0.png";
-            if (you_name.toLowerCase() == "marcus") {
-                you_name = "Marcus";
-                img_src = "0.png";
-            } else if (you_name.toLowerCase() == "vineet") {
-                you_name = "Vineet";
-                img_src = "1.png";
-            } else if (you_name.toLowerCase() == "jakub") {
-                you_name = "Jakub";
-                img_src = "2.png";
-            }
-
-            new_transcription_element(you_name, img_src);
-            new_text_element("<p>" +  data["segments"][0].text + "</p>", "transcription-" + available_transcription_elements);
-            new_transcription_element_state = false;
-        }
-        document.getElementById("transcription-" + available_transcription_elements).innerHTML = "<p>" + data["segments"][0].text + "</p>"; 
-
-        if (data["eos"] == true) {
-            new_transcription_element_state = true;
-        }
-      } else if ("llm_output" in data) {
-
-            if (new_llm_element_state) {
-                available_llm_elements = available_llm_elements + 1
-                new_transcription_element("AT&T GLM-4", "1.png");
-                new_text_element("<p>" +  data["llm_output"] + "</p>", "llm-" + available_llm_elements);
-                new_llm_element_state = false;
-            }
-            document.getElementById("llm-" + available_llm_elements).innerHTML = "<p>" + data["llm_output"] + "</p>"; 
-
-            if (data["eos"] == true) {
-                new_llm_element_state = true;
-            }
-      }
-
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 
     websocket_llm = new WebSocket(websocket_llm_uri);

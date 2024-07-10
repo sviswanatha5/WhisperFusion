@@ -33,10 +33,16 @@ class WhisperSpeechTTS:
     def start_whisperspeech_tts(self, websocket, audio_queue=None):
         self.output_audio = None
         last_message_id = None
+
+        uid = websocket.recv()
+        uid = json.loads(uid)
+        user = uid["id"]
+
         while True:
         
-            
-            llm_response = audio_queue.get()
+            temp = audio_queue[user]
+            llm_response = temp.pop(0)
+            audio_queue[user] = temp
             # if audio_queue.qsize() != 0:
             #     continue
             
@@ -45,7 +51,7 @@ class WhisperSpeechTTS:
                 websocket.ping()
             except Exception as e:
                 del websocket
-                audio_queue.put(llm_response)
+                audio_queue[user] += llm_response
                 break
             
             llm_output = llm_response["llm_output"]

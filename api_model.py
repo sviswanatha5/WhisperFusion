@@ -114,7 +114,9 @@ class CustomLLMAPI:
 
                     current_response += split[0] + punc
                     logging.info(f"CURRENT RESPONSE: {current_response}")
-                    self.audio_queue.put({"message_id": message_id, "llm_output": current_response})
+                    if not user in self.audio_queue:
+                        self.audio_queue[user] = []
+                    self.audio_queue[user] += [{"message_id": message_id, "llm_output": current_response}]
                     logging.info(f"SENT TO AUDIO_QUEUE: {current_response}")
                     total_response += current_response
 
