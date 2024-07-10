@@ -198,7 +198,7 @@ class WhisperTRTLLM(object):
         #                                tokenizer_dir=assets_dir)
         self.device = device
         self.tokenizer = get_tokenizer(
-            True,
+            multilingual=True,
             # num_languages=self.encoder.num_languages,
             language=None,
             task="transcribe",
