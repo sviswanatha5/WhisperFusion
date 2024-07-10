@@ -199,7 +199,7 @@ class WhisperTRTLLM(object):
         self.device = device
         self.tokenizer = get_tokenizer(
             multilingual=True,
-            # num_languages=self.encoder.num_languages,
+            num_languages=self.encoder.num_languages,
             language=None,
             task="transcribe",
         )

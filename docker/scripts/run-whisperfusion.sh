@@ -9,7 +9,7 @@ cd /root/scratch-space/
 cd /root/WhisperFusion
 if [ "$1" != "mistral" ]; then
   exec python3 api_main.py --phi \
-                  --whisper_tensorrt_path /root/scratch-space/models/whisper_small_en \
+                  --whisper_tensorrt_path /root/scratch-space/models/whisper_medium \
                   --api_url ws://12.1.52.176:8001/ws
                   
                   
