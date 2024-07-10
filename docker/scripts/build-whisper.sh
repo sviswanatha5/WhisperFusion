@@ -24,7 +24,7 @@ fi
 echo "Building Whisper TensorRT Engine..."
 pip install -r requirements.txt > /dev/null 2>&1
 
-python3 build.py --output_dir whisper_medium --use_gpt_attention_plugin --use_gemm_plugin --use_layernorm_plugin  --use_bert_attention_plugin --model_name medium.en > /dev/null 2>&1
+python3 build.py --output_dir whisper_medium --use_gpt_attention_plugin --use_gemm_plugin --use_layernorm_plugin  --use_bert_attention_plugin --model_name medium > /dev/null 2>&1
 
 mkdir -p /root/scratch-space/models
 cp -r whisper_medium /root/scratch-space/models
