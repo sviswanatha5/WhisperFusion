@@ -31,7 +31,7 @@ var audio_playing = false;
 var current_message_id = null;
 var currently_playing = null;
 var blacklist = [];
-var uid = null;
+var unique_id = null;
 
 initWebSocket();
 
@@ -124,9 +124,9 @@ function initWebSocket() {
   
     websocket.onopen = function() {
       console.log("Connected to server.");
-      
+      unique_id = generateUUID
       websocket.send(JSON.stringify({
-        uid: generateUUID(),
+        uid: unique_id,
         multilingual: false,
         language: "en",
         task: "transcribe"
@@ -142,7 +142,6 @@ function initWebSocket() {
 
       if ("message" in data) {
         if (data["message"] == "SERVER_READY") {
-            uid = data["uid"];
             server_state = 1;
         }
       } else if ("segments" in data) {
@@ -200,8 +199,9 @@ function initWebSocket() {
     websocket_audio.binaryType = "arraybuffer";
 
     websocket_audio.onopen = function() { 
+        console.log("Connected to websocket audio")
         websocket_audio.send(JSON.stringify({
-            id: uid
+            id: unique_id
           }));
     }
     websocket_audio.onclose = function(e) { }
@@ -263,7 +263,7 @@ function initWebSocket() {
         console.log("Connected to server.");
         
         websocket_llm.send(JSON.stringify({
-          uid: generateUUID(),
+          uid: unique_id,
         }));
       }
 
