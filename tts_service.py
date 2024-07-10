@@ -34,12 +34,15 @@ class WhisperSpeechTTS:
         self.output_audio = None
         last_message_id = None
 
-        uid = websocket.recv()
-        uid = json.loads(uid)
-        user = uid["id"]
-        logging.info(f"UID INSIDE OF tts: {user}")
+        user = None
 
         while True:
+            if not user:
+                uid = websocket.recv()
+                uid = json.loads(uid)
+                user = uid["id"]
+                continue
+            logging.info(f"UID INSIDE OF tts: {user}")
             if not user in audio_queue or audio_queue[user].length == 0:
                 continue
             logging.info(f"audio_queue {audio_queue}")
