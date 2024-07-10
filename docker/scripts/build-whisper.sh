@@ -14,9 +14,9 @@ else
 fi
 
 # the small.en model weights
-if [ ! -f assets/small.en.pt ]; then
+if [ ! -f assets/medium.pt ]; then
     echo "Downloading PyTorch weights for small.en model"
-    wget --directory-prefix=assets https://openaipublic.azureedge.net/main/whisper/models/f953ad0fd29cacd07d5a9eda5624af0f6bcf2258be67c92b79389873d91e0872/small.en.pt > /dev/null 2>&1
+    wget --directory-prefix=assets https://openaipublic.azureedge.net/main/whisper/models/345ae4da62f9b3d59415adc60127b97c714f32e89e936602e85993674d08dcb1/medium.pt > /dev/null 2>&1
 else
     echo "PyTorch weights for small.en model already exist, skipping download."
 fi
@@ -24,7 +24,7 @@ fi
 echo "Building Whisper TensorRT Engine..."
 pip install -r requirements.txt > /dev/null 2>&1
 
-python3 build.py --output_dir whisper_small_en --use_gpt_attention_plugin --use_gemm_plugin --use_layernorm_plugin  --use_bert_attention_plugin --model_name small.en > /dev/null 2>&1
+python3 build.py --output_dir whisper_medium --use_gpt_attention_plugin --use_gemm_plugin --use_layernorm_plugin  --use_bert_attention_plugin --model_name medium.en > /dev/null 2>&1
 
 mkdir -p /root/scratch-space/models
-cp -r whisper_small_en /root/scratch-space/models
+cp -r whisper_medium /root/scratch-space/models
