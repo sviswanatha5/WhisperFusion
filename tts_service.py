@@ -40,12 +40,13 @@ class WhisperSpeechTTS:
         logging.info(f"UID INSIDE OF tts: {user}")
 
         while True:
-            logging.info(f"audio_queue {audio_queue}")
             if not user in audio_queue or audio_queue[user].length == 0:
                 continue
+            logging.info(f"audio_queue {audio_queue}")
             temp = audio_queue[user]
             llm_response = temp.pop(0)
             audio_queue[user] = temp
+            logging.info(f"llm_response: {llm_response}")
             # if audio_queue.qsize() != 0:
             #     continue
             
