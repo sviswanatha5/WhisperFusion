@@ -200,7 +200,7 @@ function initWebSocket() {
     websocket_audio.binaryType = "arraybuffer";
 
     websocket_audio.onopen = function() { 
-        websocket.send(JSON.stringify({
+        websocket_audio.send(JSON.stringify({
             id: uid
           }));
     }
