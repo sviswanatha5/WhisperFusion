@@ -124,7 +124,7 @@ function initWebSocket() {
   
     websocket.onopen = function() {
       console.log("Connected to server.");
-      unique_id = generateUUID
+      unique_id = generateUUID()
       websocket.send(JSON.stringify({
         uid: unique_id,
         multilingual: false,
