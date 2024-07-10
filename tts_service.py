@@ -42,7 +42,7 @@ class WhisperSpeechTTS:
                 uid = json.loads(uid)
                 user = uid["id"]
                 continue
-            if not user in audio_queue or audio_queue[user].length == 0:
+            if not user in audio_queue or len(audio_queue[user]) == 0:
                 continue
             logging.info(f"audio_queue {audio_queue}")
             temp = audio_queue[user]
