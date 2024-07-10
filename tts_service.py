@@ -39,7 +39,8 @@ class WhisperSpeechTTS:
         user = uid["id"]
 
         while True:
-        
+            if not user in audio_queue or audio_queue[user].length == 0:
+                continue
             temp = audio_queue[user]
             llm_response = temp.pop(0)
             audio_queue[user] = temp
