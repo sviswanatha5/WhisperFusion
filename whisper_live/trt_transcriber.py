@@ -273,7 +273,7 @@ class WhisperTRTLLM(object):
     def process_batch(
             self,
             mel,
-            text_prefix="<|startoftranscript|><|en|><|transcribe|><|notimestamps|>",
+            text_prefix="<|startoftranscript|><|transcribe|><|notimestamps|>",
             num_beams=1):
         prompt_id = self.tokenizer.encode(
             text_prefix, allowed_special=set(self.tokenizer.special_tokens.keys()))
@@ -297,7 +297,7 @@ class WhisperTRTLLM(object):
     def transcribe(
             self,
             mel,
-            text_prefix="<|startoftranscript|><|en|><|transcribe|><|notimestamps|>",
+            text_prefix="<|startoftranscript|><|transcribe|><|notimestamps|>",
             dtype='float16',
             batch_size=1,
             num_beams=1,
