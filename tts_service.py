@@ -24,7 +24,8 @@ class WhisperSpeechTTS:
         for _ in tqdm(range(3), desc="Warming up"):
             warmup = time.time()
             self.pipe.generate("Hello, I am warming up.")
-
+            final = time.time() - warmup
+            logging.info(f"[WhisperSpeech INFO:] Inference finished in {final}")
         logging.info("[WhisperSpeech INFO:] Warmed up Whisper Speech torch compile model. Connect to the WebGUI now.")
         should_send_server_ready.value = True
         with serve(
