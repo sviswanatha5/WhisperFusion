@@ -14,7 +14,7 @@ class WhisperSpeechTTS:
         pass
 
     def initialize_model(self):
-        self.pipe = Pipeline(s2a_ref='collabora/whisperspeech:s2a-v1.95-medium-7lang.model', torch_compile=True, device="cuda:1")
+        self.pipe = Pipeline(s2a_ref='collabora/whisperspeech:s2a-v1.95-medium-7lang.model', t2s_ref='t2s-v1.95-medium-7lang.model', torch_compile=True, device="cuda:1")
         self.last_llm_response = None
 
     def run(self, host, port, audio_queue=None, should_send_server_ready=None):
@@ -80,8 +80,10 @@ class WhisperSpeechTTS:
                     logging.info(f"Audio getting processed: {llm_output.strip()} .\n\n")
 
                     start = time.time()
-                    lang_added = "<en> " + llm_output.strip()
-                    audio = self.pipe.generate(lang_added)
+                    stoks = self.pipe.t2s.generate(llm_output, cps=14, lang='en')
+                    stoks = stoks[stoks!=512]
+                    atoks = self.pipe.s2a.generate(stoks, None)
+                    audio = self.pipe.vocoder.decode(atoks)
                     inference_time = time.time() - start
                     logging.info(f"[WhisperSpeech INFO:] TTS inference done in {inference_time} ms for  SENTENCE: {llm_output.strip()}.\n\n")
                     self.output_audio = audio.cpu().numpy()
