@@ -84,7 +84,7 @@ class WhisperSpeechTTS:
                     logging.info(f"Audio getting processed: {llm_output.strip()} .\n\n")
 
                     start = time.time()
-                    weights = self.language_detection(llm_output, top_k=20, trunction=True)
+                    weights = self.language_detection(llm_output, top_k=20, truncation=True)
                     weights = [ e for e in weights if e in self.langauges]
                     logging.info(f"Detected language: {weights}")
                     stoks = self.pipe.t2s.generate(llm_output, cps=14, lang='en')
