@@ -101,6 +101,8 @@ class WhisperSpeechTTS:
             except RuntimeError as e:
                 logging.info(f"ENTERED RUNTIMEERROR: {e}")
                 continue
+            except Exception as e:
+                logging.info(f"ENTERED ERROR: {e}")
             if self.output_audio is not None:
                 try:
                     websocket.send(message_id.to_bytes(4, 'big') + self.output_audio.tobytes())
