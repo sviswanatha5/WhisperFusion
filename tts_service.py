@@ -86,7 +86,12 @@ class WhisperSpeechTTS:
                     start = time.time()
                     weights = self.language_detection(llm_output, top_k=20, truncation=True)
                     logging.info(f"Language Detection output: {weights}")
-                    weights = [ e for e in weights if e in self.langauges]
+                    
+                    for e in weights:
+                        if e["label"] in self.languages:
+                            weights = e["label"]
+                            break
+                    #weights = [ e for e in weights if e in self.langauges]
                     logging.info(f"Detected language: {weights}")
                     stoks = self.pipe.t2s.generate(llm_output, cps=14, lang='en')
                     stoks = stoks[stoks!=512]
