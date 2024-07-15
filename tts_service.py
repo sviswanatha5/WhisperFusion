@@ -82,7 +82,7 @@ class WhisperSpeechTTS:
                     start = time.time()
                     stoks = self.pipe.t2s.generate(llm_output, cps=14, lang='en')
                     stoks = stoks[stoks!=512]
-                    atoks = self.pipe.s2a.generate(stoks, None)
+                    atoks = self.pipe.s2a.generate(stoks, self.pipe.default_speaker)
                     audio = self.pipe.vocoder.decode(atoks)
                     inference_time = time.time() - start
                     logging.info(f"[WhisperSpeech INFO:] TTS inference done in {inference_time} ms for  SENTENCE: {llm_output.strip()}.\n\n")
