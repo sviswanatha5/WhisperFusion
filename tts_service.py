@@ -14,7 +14,7 @@ class WhisperSpeechTTS:
         pass
 
     def initialize_model(self):
-        self.pipe = Pipeline(s2a_ref='collabora/whisperspeech:s2a-v1.95-medium-7lang.model', t2s_ref='t2s-v1.95-medium-7lang.model', torch_compile=True, device="cuda:1")
+        self.pipe = Pipeline(s2a_ref='collabora/whisperspeech:s2a-v1.95-medium-7lang.model', torch_compile=True, device="cuda:1")
         self.last_llm_response = None
 
     def run(self, host, port, audio_queue=None, should_send_server_ready=None):
