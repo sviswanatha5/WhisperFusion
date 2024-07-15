@@ -26,6 +26,9 @@ if [ ! -f "$MARKER_FILE" ]; then
     huggingface-cli download collabora/whisperspeech t2s-small-en+pl.model s2a-q4-tiny-en+pl.model
     huggingface-cli download charactr/vocos-encodec-24khz
 
+    git clone https://github.com/collabora/WhisperSpeech.git
+    pip install -e "./WhisperSpeech[whisperspeech]"
+
     mkdir -p /root/.cache/torch/hub/checkpoints/
     curl -L -o /root/.cache/torch/hub/checkpoints/encodec_24khz-d7cc33bc.th https://dl.fbaipublicfiles.com/encodec/v0/encodec_24khz-d7cc33bc.th
     mkdir -p /root/.cache/whisper-live/
