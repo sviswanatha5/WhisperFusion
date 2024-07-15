@@ -22,7 +22,9 @@ class WhisperSpeechTTS:
         self.initialize_model()
         logging.info("\n[WhisperSpeech INFO:] Warming up torch compile model. Please wait ...\n")
         for _ in tqdm(range(3), desc="Warming up"):
+            warmup = time.time()
             self.pipe.generate("Hello, I am warming up.")
+
         logging.info("[WhisperSpeech INFO:] Warmed up Whisper Speech torch compile model. Connect to the WebGUI now.")
         should_send_server_ready.value = True
         with serve(
@@ -77,7 +79,8 @@ class WhisperSpeechTTS:
                     logging.info(f"Audio getting processed: {llm_output.strip()} .\n\n")
 
                     start = time.time()
-                    audio = self.pipe.generate(llm_output.strip(), lang='zh')
+                    lang_added = "<en> " + llm_output.strip()
+                    audio = self.pipe.generate(lang_added)
                     inference_time = time.time() - start
                     logging.info(f"[WhisperSpeech INFO:] TTS inference done in {inference_time} ms for  SENTENCE: {llm_output.strip()}.\n\n")
                     self.output_audio = audio.cpu().numpy()
