@@ -14,7 +14,7 @@ class WhisperSpeechTTS:
         pass
 
     def initialize_model(self):
-        self.pipe = Pipeline(s2a_ref='collabora/whisperspeech:s2a-v1.95-medium-7lang.model', t2s_ref='collabora/whisperspeech:t2s-v1.95-medium-7lang.model', torch_compile=True, device="cuda:1")
+        self.pipe = Pipeline(t2s_ref='collabora/whisperspeech:t2s-v1.95-medium-7lang.model', s2a_ref='collabora/whisperspeech:s2a-v1.95-medium-7lang.model', torch_compile=True, device="cuda:1")
         self.last_llm_response = None
 
     def run(self, host, port, audio_queue=None, should_send_server_ready=None):
@@ -94,8 +94,6 @@ class WhisperSpeechTTS:
             except RuntimeError as e:
                 logging.info(f"ENTERED RUNTIMEERROR: {e}")
                 continue
-            except AttributeError as e:
-                logging.error(f"[WhisperSpeech ERROR:] Received {llm_output} from API. Should not be None")
             if self.output_audio is not None:
                 try:
                     websocket.send(message_id.to_bytes(4, 'big') + self.output_audio.tobytes())
