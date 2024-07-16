@@ -51,7 +51,7 @@ class CustomLLMAPI:
             ) as server:
             server.serve_forever()
 
-    def query(self, query, user, message_id, client_socket):
+    def query(self, query, user, message_id, client_socket, language):
         start = time.time()
         event = self.events[user]
         total_response = ""
@@ -68,8 +68,6 @@ class CustomLLMAPI:
             
             logging.info(f"SUCCESSFULY SENT: {query}")
             
-            flag = True
-
             while not event.is_set():
                 try:
                     logging.info(f"CLIENT SOCKET: {client_socket.id}, type: {type(client_socket)}")
@@ -119,7 +117,7 @@ class CustomLLMAPI:
                     logging.info(f"CURRENT RESPONSE: {current_response}")
                     if not user in self.audio_queue:
                         self.audio_queue[user] = []
-                    self.audio_queue[user] += [{"message_id": message_id, "llm_output": current_response}]
+                    self.audio_queue[user] += [{"message_id": message_id, "llm_output": current_response, "language": language}]
                     logging.info(f"SENT TO AUDIO_QUEUE: {current_response}")
                     total_response += current_response
 
@@ -177,8 +175,6 @@ class CustomLLMAPI:
             websocket.ping()
             logging.info(f"Websocket: {websocket.id}")
             
-            
-            
             if user not in self.conversation_history:
                 self.conversation_history[user] = ConversationHistory()
                 
@@ -202,7 +198,7 @@ class CustomLLMAPI:
 
                 logging.info(f"Websocket: {websocket.id}")
 
-                thread = threading.Thread(target=self.query, args=(query, user, message_id, websocket))
+                thread = threading.Thread(target=self.query, args=(query, user, message_id, websocket, transcription_output["language"]))
                 thread.start()
                 # self.query(query, user, message_id, websocket)
                 logging.info("Continuing")

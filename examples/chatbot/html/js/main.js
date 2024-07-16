@@ -150,7 +150,8 @@ function initWebSocket() {
       websocket.send(JSON.stringify({
         uid: unique_id,
         multilingual: false,
-        language: "en",
+        input_language: input_language,
+        output_language: output_language,
         task: "transcribe"
       }));
     }

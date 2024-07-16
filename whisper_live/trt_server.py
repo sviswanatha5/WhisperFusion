@@ -121,7 +121,8 @@ class TranscriptionServer:
         client = ServeClient(
             websocket,
             multilingual=options["multilingual"],
-            language=options["language"],
+            input_language=options["input_language"],
+            output_language=options["output_language"],
             task=options["task"],
             client_uid=options["uid"],
             transcription_queue=transcription_queue,
@@ -251,7 +252,8 @@ class ServeClient:
         task="transcribe",
         device=None,
         multilingual=False,
-        language=None, 
+        input_language="en",
+        output_language="en",
         client_uid=None,
         transcription_queue=None,
         llm_queue=None,
@@ -282,6 +284,10 @@ class ServeClient:
         self.frames = b""
         self.task = task
         self.last_prompt = None
+
+        self.input_language = input_language
+        self.output_language = output_language
+        logging.info(f"Intialized with languages: {self.input_language} {self.output_language}")
 
         self.timestamp_offset = 0.0
         self.frames_np = None
@@ -394,7 +400,7 @@ class ServeClient:
                 input_sample = input_bytes.copy()
                 start = time.time()
                 mel, duration = self.transcriber.log_mel_spectrogram(input_sample)
-                last_segment = self.transcriber.transcribe(mel)
+                last_segment = self.transcriber.transcribe(mel, text_prefix=f"<|startoftranscript|><|{self.input_language}|><|transcribe|><|notimestamps|>")
                 infer_time = time.time() - start
                 self.segment_inference_time.append(infer_time)
 
@@ -413,7 +419,7 @@ class ServeClient:
                                 })
                             )
                             
-                        self.transcription_queue.put({"uid": self.client_uid, "prompt": self.prompt, "eos": self.eos})
+                        self.transcription_queue.put({"uid": self.client_uid, "prompt": self.prompt, "eos": self.eos, "language": self.output_language})
                         if self.eos:
                             self.timestamp_offset += duration
                             logging.info(f"[Whisper INFO]: {self.prompt}, eos: {self.eos}")

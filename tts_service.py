@@ -92,8 +92,8 @@ class WhisperSpeechTTS:
                             weights = e["label"]
                             break
                     #weights = [ e for e in weights if e in self.langauges]
-                    logging.info(f"Detected language: {weights}")
-                    stoks = self.pipe.t2s.generate(llm_output, cps=14, lang=weights)
+                    logging.info(f"Detected language: {llm_response["language"]}")
+                    stoks = self.pipe.t2s.generate(llm_output, cps=14, lang=llm_response["language"])
                     stoks = stoks[stoks!=512]
                     atoks = self.pipe.s2a.generate(stoks, self.pipe.default_speaker)
                     audio = self.pipe.vocoder.decode(atoks)
