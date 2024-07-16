@@ -52,12 +52,21 @@ function toggleDropdown(dropdownId) {
 function onInputChange(val) {
     input_language = languageMap[val];
 
+    websocket.send(JSON.stringify({
+        input_language: input_language,
+        output_language: output_language,
+    }));
+
     console.log("INPUT CHANGE: " + input_language)
 
 }
 
 function onOutputChange(val) {
     output_language = languageMap[val];
+    websocket.send(JSON.stringify({
+        input_language: input_language,
+        output_language: output_language,
+    }));
     console.log("OUTPUT CHANGE: " + output_language)
 }
 
