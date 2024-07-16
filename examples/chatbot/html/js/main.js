@@ -168,11 +168,13 @@ function initWebSocket() {
         }
       } else if ("segments" in data) {
         if (new_transcription_element_state) {
+            if (current_message_id != null) {
+                blacklist.push(current_message_id);
+                audio_streams = audio_streams.filter(a => a[0] !== current_message_id);
+            }
             if (audio_playing) {
                 currently_playing.stop();
                 audio_playing = false;
-                blacklist.push(current_message_id);
-                audio_streams = audio_streams.filter(a => a[0] !== current_message_id);
                 current_message_id = null;
             }
             available_transcription_elements = available_transcription_elements + 1;
