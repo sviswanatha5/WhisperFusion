@@ -74,7 +74,7 @@ class TranscriptionServer:
 
         return wait_time / 60
     
-    def isJson(str):
+    def isJson(self, str):
         try:
             json.loads(str)
         except Exception as e:
