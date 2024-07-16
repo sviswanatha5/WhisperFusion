@@ -79,9 +79,9 @@ class TranscriptionServer:
             json.loads(str)
         except Exception as e:
             logging.info(f"JSON EXCEPTION: {e}")
-            return false 
+            return False 
         
-        return true
+        return True
 
     def recv_audio(self, websocket, transcription_queue=None, llm_queue=None, whisper_tensorrt_path=None, should_send_server_ready=None, conversation_history=None, events=None):
         """
