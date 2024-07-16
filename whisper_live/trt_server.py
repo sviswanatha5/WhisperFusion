@@ -400,6 +400,7 @@ class ServeClient:
                 input_sample = input_bytes.copy()
                 start = time.time()
                 mel, duration = self.transcriber.log_mel_spectrogram(input_sample)
+                logging.info(f"INPUT LANGUGAGE: {self.input_language}")
                 last_segment = self.transcriber.transcribe(mel, text_prefix=f"<|startoftranscript|><|{self.input_language}|><|transcribe|><|notimestamps|>")
                 infer_time = time.time() - start
                 self.segment_inference_time.append(infer_time)
