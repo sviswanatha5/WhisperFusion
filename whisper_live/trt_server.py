@@ -147,7 +147,7 @@ class TranscriptionServer:
             # spinlock
             try:
                 frame_data = websocket.recv()
-                if (isJson(frame_data)):
+                if self.isJson(frame_data):
                     dumps = json.dumps(frame_data)
                     self.clients[websocket].input_language = dumps['input_language']
                     self.clients[websocket].output_language = dumps['output_language']
