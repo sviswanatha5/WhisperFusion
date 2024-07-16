@@ -20,14 +20,39 @@
       <h3>WhisperFusion: AT&T Version</h3>
       <br>
 
+      <!-- Dropdown Buttons Container -->
+      <div class="dropdowns-wrapper" style="display: flex; justify-content: center;">
+        <div class="dropdown-container"
+          style="background-color: #0B9EDA; border-radius: 20px; padding: 10px; margin-right: 10px;">
+          <div class="dropdown">
+            <select id="inputLanguageDropdown" onchange="onInputChange( this.value)">
+              <option value="English">English</option>
+              <option value="French">French</option>
+              <option value="Mandarin">Mandarin</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="dropdown-container" style="background-color: #0B9EDA; border-radius: 20px; padding: 10px;">
+          <div class="dropdown">
+            <select id="outputLanguageDropdown" onchange="onOutputChange( this.value)">
+              <option value="English">English</option>
+              <option value="French">French</option>
+              <option value="Mandarin">Mandarin</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
   <center>
     <div id="main-wrapper" class="message-wrapper" style="max-width: 500px;"></div>
-
     <br><br>
+
+    <!-- Microphone Button Container -->
     <div id="control-container" class="control-container"
-      style="width:500px;height:50px;background-color: #0B9EDA;border-radius: 20px;">
+      style="width:500px;background-color: #0B9EDA;border-radius: 20px;padding: 20px; margin-top: 20px;">
       <div style="margin-top:10px;padding-left:20px">
         <img class="button-item" onclick="startRecording()" onmouseleave='this.src="img/microphone.png"'
           onmouseover='this.src="img/microphone-hover.png"' style="width:20px;padding-top:4px"
@@ -51,11 +76,10 @@
       <div style="margin-top:2px;padding-left:10px;padding-top:0px">
         <p id="recording-time" style="display:none;">00:00</p>
       </div>
-      <div></div>
     </div>
+
     <br><br>
   </center>
-
 </body>
 
 <script src="js/main.js"></script>

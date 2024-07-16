@@ -32,8 +32,30 @@ var current_message_id = null;
 var currently_playing = null;
 var blacklist = [];
 var unique_id = null;
+var input_language = null;
+var output_language = null;
 
 initWebSocket();
+
+// Function to toggle dropdown visibility
+function toggleDropdown(dropdownId) {
+    var dropdown = document.getElementById(dropdownId);
+    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+}
+
+// Function to select a language and update the button text
+function onInputChange(val) {
+    input_language = val;
+
+    console.log("INPUT CHANGE: " + input_language)
+
+}
+
+function onOutputChange(val) {
+    output_language = val;
+    console.log("OUTPUT CHANGE: " + output_language)
+}
+
 
 const zeroPad = (num, places) => String(num).padStart(places, '0')
 
