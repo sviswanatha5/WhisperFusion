@@ -73,6 +73,15 @@ class TranscriptionServer:
                 wait_time = current_client_time_remaining
 
         return wait_time / 60
+    
+    def isJson(str):
+        try:
+            json.loads(str)
+        except Exception as e:
+            logging.info(f"JSON EXCEPTION: {e}")
+            return false 
+        
+        return true
 
     def recv_audio(self, websocket, transcription_queue=None, llm_queue=None, whisper_tensorrt_path=None, should_send_server_ready=None, conversation_history=None, events=None):
         """
@@ -138,6 +147,11 @@ class TranscriptionServer:
             # spinlock
             try:
                 frame_data = websocket.recv()
+                if (isJson(frame_data)):
+                    dumps = json.dumps(frame_data)
+                    self.clients[websocket].input_language = dumps['input_language']
+                    self.clients[websocket].output_language = dumps['output_language']
+                
                 frame_np = np.frombuffer(frame_data, dtype=np.float32)
 
                 # VAD
