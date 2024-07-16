@@ -191,7 +191,7 @@ class TranscriptionServer:
                     break
 
             except Exception as e:
-                logging.error(e)
+                logging.exception(e)
                 if self.clients[websocket].client_uid in conversation_history:
                         del conversation_history[self.clients[websocket].client_uid]
                 logging.info(f"Refernces to transcriber: {gc.get_referrers(self.clients[websocket].transcriber)}")
