@@ -22,11 +22,12 @@ class ConversationHistory:
             self.history.pop(0)
         self.history.append({"speaker": speaker, "message": message})
 
-    def get_formatted_history(self, add_generation_prompt=True):
+    def get_formatted_history(self, language, add_generation_prompt=True):
         template = """This is the current conversation history between a user and assistant: 
         {% for message in messages %}{% if message['speaker'] == 'user' %}{{'user\n' + message['message'] + '\n'}}{% elif message['speaker'] == 'assistant' %}{{'assistant\n' + message['message'] + '\n' }}{% else %}{{ 'system\n' + message['message'] + '\n' }}{% endif %}{% endfor %}{% if add_generation_prompt %}{% endif %} 
         Note: The conversation history is provided for context. Do not generate responses that involve both the user and the assistant in a loop. Respond only as the assistant.
-        assistant"""
+        assistant
+        Answer in """ + language
         t = Template(template)
         return t.render(messages=self.history, add_generation_prompt=add_generation_prompt)
     
@@ -184,7 +185,7 @@ class CustomLLMAPI:
                 
                 messages = [{"speaker": "user", "message": prompt}]
                 formatted_prompt = messages[-1]['message']
-                history_prompt = self.conversation_history[user].get_formatted_history(formatted_prompt)
+                history_prompt = self.conversation_history[user].get_formatted_history(formatted_prompt, transcription_output["language"])
                 
                 query = [{"role": "user", "content": history_prompt}]
                 logging.info(f"Sending request to: {self.api_url}")

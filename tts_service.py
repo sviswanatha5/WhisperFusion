@@ -17,7 +17,7 @@ class WhisperSpeechTTS:
     def initialize_model(self):
         self.pipe = Pipeline(t2s_ref='collabora/whisperspeech:t2s-v1.95-medium-7lang.model', s2a_ref='collabora/whisperspeech:s2a-v1.95-medium-7lang.model', torch_compile=True, device="cuda:1")
         self.language_detection = pipeline("text-classification", model="papluca/xlm-roberta-base-language-detection")
-        self.languages = ['en', 'fr', 'es', 'pl']
+        self.languages = {"English": 'en', "French": 'fr', "Spanish": 'es', "Polish": 'pl'}
 
         self.last_llm_response = None
 
@@ -84,15 +84,8 @@ class WhisperSpeechTTS:
                     logging.info(f"Audio getting processed: {llm_output.strip()} .\n\n")
 
                     start = time.time()
-                    weights = self.language_detection(llm_output, top_k=20, truncation=True)
-                  
-        
-                    for e in weights:
-                        if e["label"] in self.languages:
-                            weights = e["label"]
-                            break
-                    #weights = [ e for e in weights if e in self.langauges]
-                    help = llm_response["language"]
+
+                    help = self.languages[llm_response["language"]]
                     logging.info(f"Detected language: {help}")
                     stoks = self.pipe.t2s.generate(llm_output, cps=14, lang=llm_response["language"])
                     stoks = stoks[stoks!=512]
