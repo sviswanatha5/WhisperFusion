@@ -32,8 +32,13 @@ var current_message_id = null;
 var currently_playing = null;
 var blacklist = [];
 var unique_id = null;
-var input_language = null;
-var output_language = null;
+var input_language = "English";
+var output_language = "English";
+
+let languageMap = {}
+languageMap['English'] = 'en';
+languageMap['French'] = 'fr';
+languageMap['Chinese'] = 'zh'
 
 initWebSocket();
 
@@ -45,14 +50,14 @@ function toggleDropdown(dropdownId) {
 
 // Function to select a language and update the button text
 function onInputChange(val) {
-    input_language = val;
+    input_language = languageMap[val];
 
     console.log("INPUT CHANGE: " + input_language)
 
 }
 
 function onOutputChange(val) {
-    output_language = val;
+    output_language = languageMap[val];
     console.log("OUTPUT CHANGE: " + output_language)
 }
 
