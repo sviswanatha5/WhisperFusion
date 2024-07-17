@@ -16,6 +16,7 @@ logging.basicConfig(level=logging.INFO)
 class ConversationHistory:
     def __init__(self):
         self.history = []
+        self.languages = {"en": "English", "fr": "French", "zh": "Mandarin"}
 
     def add_to_history(self, speaker, message):
         if len(self.history) > 10:
@@ -27,7 +28,7 @@ class ConversationHistory:
         {% for message in messages %}{% if message['speaker'] == 'user' %}{{'user\n' + message['message'] + '\n'}}{% elif message['speaker'] == 'assistant' %}{{'assistant\n' + message['message'] + '\n' }}{% else %}{{ 'system\n' + message['message'] + '\n' }}{% endif %}{% endfor %}{% if add_generation_prompt %}{% endif %} 
         Note: The conversation history is provided for context. Do not generate responses that involve both the user and the assistant in a loop. Respond only as the assistant.
         assistant
-        Answer in """ + language
+        Answer in """ + self.languages[language] + "\n"
         t = Template(template)
         return t.render(messages=self.history, add_generation_prompt=add_generation_prompt)
     

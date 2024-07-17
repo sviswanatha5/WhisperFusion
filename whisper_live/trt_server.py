@@ -78,7 +78,7 @@ class TranscriptionServer:
         try:
             json.loads(str)
         except Exception as e:
-            logging.info(f"JSON EXCEPTION: {e}")
+            # logging.info(f"JSON EXCEPTION: {e}")
             return False 
         
         return True
