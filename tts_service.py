@@ -85,7 +85,7 @@ class WhisperSpeechTTS:
 
                     start = time.time()
 
-                    help = self.languages[llm_response["language"]]
+                    help = llm_response["language"]
                     logging.info(f"Detected language: {help}")
                     stoks = self.pipe.t2s.generate(llm_output, cps=14, lang=help)
                     stoks = stoks[stoks!=512]
