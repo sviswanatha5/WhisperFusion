@@ -186,7 +186,7 @@ class CustomLLMAPI:
                 
                 messages = [{"speaker": "user", "message": prompt}]
                 formatted_prompt = messages[-1]['message']
-                history_prompt = self.conversation_history[user].get_formatted_history(formatted_prompt, transcription_output["language"])
+                history_prompt = self.conversation_history[user].get_formatted_history(transcription_output["language"], formatted_prompt)
                 
                 query = [{"role": "user", "content": history_prompt}]
                 logging.info(f"Sending request to: {self.api_url}")
