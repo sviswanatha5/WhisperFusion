@@ -29,7 +29,7 @@ def split_response_on_punctuation(llm_response, punc):
 class ConversationHistory:
     def __init__(self):
         self.history = []
-        self.languages = {"en": "English", "fr": "French", "zh": "Chinese"}
+        self.languages = {"en": "English", "fr": "French", "zh": "Chinese", "es": "Spanish"}
 
     def add_to_history(self, speaker, message):
         if len(self.history) > 10:
