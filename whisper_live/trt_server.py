@@ -148,10 +148,10 @@ class TranscriptionServer:
             try:
                 frame_data = websocket.recv()
                 if self.isJson(frame_data):
-                    dumps = json.dumps(frame_data)
+                    dumps = json.loads(frame_data)
                     logging.info(f"Dumps: {dumps}")
-                    self.clients[websocket].input_language = dumps['input_language']
-                    self.clients[websocket].output_language = dumps['output_language']
+                    self.clients[websocket].input_language = dumps["input_language"]
+                    self.clients[websocket].output_language = dumps["output_language"]
                 
                 frame_np = np.frombuffer(frame_data, dtype=np.float32)
 
