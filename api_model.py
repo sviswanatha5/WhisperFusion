@@ -13,6 +13,19 @@ from jinja2 import Template
 
 logging.basicConfig(level=logging.INFO)
 
+punc = "！？｡。＂＃＄％.!?＆＇（）＊＋，－／：；＜＝＞＠［＼］＾＿｀｛｜｝～｟｠｢｣､、〃》「」『』【】〔〕〖〗〘〙〚〛〜〝〞〟〰〾〿–—‘’‛“”„‟…‧﹏."
+
+
+def split_response_on_punctuation(llm_response, punc):
+    # Iterate through the response to find the first punctuation character
+    for char in llm_response:
+        if char in punc:
+            # Split the response based on the first found punctuation character
+            split = llm_response.split(char)
+            return split, char
+
+    # If no punctuation is found, return the original response and None
+    return [llm_response], None
 class ConversationHistory:
     def __init__(self):
         self.history = []
@@ -102,20 +115,11 @@ class CustomLLMAPI:
                     "latency": self.infer_time
                 }]
                 
+               
+                split, currPunc = split_response_on_punctuation(llm_response, punc)
                 
-                if any(char in llm_response for char in ['.', '?', '!']):
-
-                    if "." in llm_response:
-                        split = llm_response.split(".")
-                        punc = "."
-                    elif "?" in llm_response:
-                        split = llm_response.split("?")
-                        punc = "?"
-                    else:
-                        split = llm_response.split("!")
-                        punc = "!"
-
-                    current_response += split[0] + punc
+                if currPunc:
+                    current_response += split[0] + currPunc
                     logging.info(f"CURRENT RESPONSE: {current_response}")
                     if not user in self.audio_queue:
                         self.audio_queue[user] = []
@@ -126,6 +130,31 @@ class CustomLLMAPI:
                     current_response = ""
                 else:
                     current_response += llm_response
+                    
+                
+                # if any(char in llm_response for char in ['.', '?', '!']):
+
+                #     if "." in llm_response:
+                #         split = llm_response.split(".")
+                #         punc = "."
+                #     elif "?" in llm_response:
+                #         split = llm_response.split("?")
+                #         punc = "?"
+                #     else:
+                #         split = llm_response.split("!")
+                #         punc = "!"
+
+                #     current_response += split[0] + punc
+                #     logging.info(f"CURRENT RESPONSE: {current_response}")
+                #     if not user in self.audio_queue:
+                #         self.audio_queue[user] = []
+                #     self.audio_queue[user] += [{"message_id": message_id, "llm_output": current_response, "language": language}]
+                #     logging.info(f"SENT TO AUDIO_QUEUE: {current_response}")
+                #     total_response += current_response
+
+                #     current_response = ""
+                # else:
+                #     current_response += llm_response
                     
                 logging.info(f"RESPONSE: {llm_response}")
                 
