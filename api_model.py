@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO)
 class ConversationHistory:
     def __init__(self):
         self.history = []
-        self.languages = {"en": "English", "fr": "French", "zh": "Mandarin"}
+        self.languages = {"en": "English", "fr": "French", "zh": "Chinese"}
 
     def add_to_history(self, speaker, message):
         if len(self.history) > 10:
