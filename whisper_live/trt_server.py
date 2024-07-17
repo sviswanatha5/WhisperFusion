@@ -152,6 +152,7 @@ class TranscriptionServer:
                     logging.info(f"Dumps: {dumps}")
                     self.clients[websocket].input_language = dumps["input_language"]
                     self.clients[websocket].output_language = dumps["output_language"]
+                    continue
                 
                 frame_np = np.frombuffer(frame_data, dtype=np.float32)
 
