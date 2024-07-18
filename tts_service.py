@@ -23,7 +23,6 @@ class WhisperSpeechTTS:
         self.pipe = Pipeline(t2s_ref='collabora/whisperspeech:t2s-v1.95-medium-7lang.model', s2a_ref='collabora/whisperspeech:s2a-v1.95-medium-7lang.model', torch_compile=True, device="cuda:1")
         self.language_detection = pipeline("text-classification", model="papluca/xlm-roberta-base-language-detection")
         self.languages = {"English": 'en', "French": 'fr', "Spanish": 'es', "Polish": 'pl'}
-
         self.models = {
             'es': TTS(language='ES', device=device),
             'fr': TTS(language='FR', device=device),
@@ -34,6 +33,16 @@ class WhisperSpeechTTS:
 
         self.last_llm_response = None
 
+
+    def generate_text(self, language, llm_output):
+        if language == 'en':
+            stoks = self.pipe.t2s.generate(llm_output, cps=14, lang=language)
+            stoks = stoks[stoks!=512]
+            atoks = self.pipe.s2a.generate(stoks, self.pipe.default_speaker)
+            return self.pipe.vocoder.decode(atoks)
+        else:
+            return self.models[language].tts_to_file(llm_output, self.models[language].hps.data.spk2id[language.upper()], None, speed=speed)
+
     def run(self, host, port, audio_queue=None, should_send_server_ready=None):
         # initialize and warmup model
         self.initialize_model()
@@ -41,8 +50,8 @@ class WhisperSpeechTTS:
         for _ in tqdm(range(3), desc="Warming up"):
             warmup = time.time()
             self.pipe.generate("Hello, I am warming up.")
-            typecheck = self.models['fr'].tts_to_file("Hello, I am warming up.", self.models['fr'].hps.data.spk2id['FR'], None, speed=speed)
-            logging.info(f"Checking type of output: {type(typecheck)}")
+            for key, value in self.models.items():
+                value.tts_to_file("Hello, I am warming up.", value.hps.data.spk2id[key.upper()], None, speed=speed)
             final = time.time() - warmup
             logging.info(f"[WhisperSpeech INFO:] Inference finished in {final}")
         logging.info("[WhisperSpeech INFO:] Warmed up Whisper Speech torch compile model. Connect to the WebGUI now.")
@@ -102,10 +111,7 @@ class WhisperSpeechTTS:
 
                     help = llm_response["language"]
                     logging.info(f"Detected language: {help}")
-                    stoks = self.pipe.t2s.generate(llm_output, cps=14, lang=help)
-                    stoks = stoks[stoks!=512]
-                    atoks = self.pipe.s2a.generate(stoks, self.pipe.default_speaker)
-                    audio = self.pipe.vocoder.decode(atoks)
+                    audio = self.generate_text(help, llm_output)
                     inference_time = time.time() - start
                     logging.info(f"[WhisperSpeech INFO:] TTS inference done in {inference_time} ms for  SENTENCE: {llm_output.strip()}.\n\n")
                     self.output_audio = audio.cpu().numpy()
