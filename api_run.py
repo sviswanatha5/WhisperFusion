@@ -8,6 +8,9 @@ from queue import Queue, Empty
 from transformers import TextStreamer
 import threading
 
+
+device = "cuda:2"
+
 class StopSignal:
     """A unique class to signal stopping the streamer."""
     pass
@@ -70,7 +73,7 @@ async def load_model():
     model_name = "internlm/internlm2_5-7b-chat-1m"
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
     model = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=True)
-    model.to("cuda")
+    model.to(device)
     model.eval()
     logging.info("Model loaded successfully")
 
@@ -99,8 +102,8 @@ def format_input(query: str) -> str:
 os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
 
 async def generate_text(query: str, streamer: CustomStreamer, stop_event: asyncio.Event):
-    input_ids = tokenizer(format_input(query), return_tensors="pt").input_ids.to("cuda")
-    attention_mask = torch.ones_like(input_ids).to("cuda")
+    input_ids = tokenizer(format_input(query), return_tensors="pt").input_ids.to(device)
+    attention_mask = torch.ones_like(input_ids).to(device)
 
     generation_kwargs = {
         "input_ids": input_ids,
