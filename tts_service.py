@@ -39,7 +39,8 @@ class WhisperSpeechTTS:
             stoks = self.pipe.t2s.generate(llm_output, cps=14, lang=language)
             stoks = stoks[stoks!=512]
             atoks = self.pipe.s2a.generate(stoks, self.pipe.default_speaker)
-            return self.pipe.vocoder.decode(atoks)
+            audio = self.pipe.vocoder.decode(atoks)
+            return audio.cpu().numpy()
         else:
             return self.models[language].tts_to_file(llm_output, self.models[language].hps.data.spk2id[language.upper()], None, speed=speed)
 
@@ -111,10 +112,9 @@ class WhisperSpeechTTS:
 
                     help = llm_response["language"]
                     logging.info(f"Detected language: {help}")
-                    audio = self.generate_text(help, llm_output)
+                    self.output_audio = self.generate_text(help, llm_output)
                     inference_time = time.time() - start
                     logging.info(f"[WhisperSpeech INFO:] TTS inference done in {inference_time} ms for  SENTENCE: {llm_output.strip()}.\n\n")
-                    self.output_audio = audio.cpu().numpy()
                     self.last_llm_response = llm_output.strip()
             except TimeoutError:
                 logging.info("ENTERED TIMEOUTERROR")
