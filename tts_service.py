@@ -8,6 +8,17 @@ from whisperspeech.pipeline import Pipeline
 import json
 import base64
 from transformers import pipeline
+from melo.api import TTS
+
+device="cuda:1"
+models = {
+    'EN': TTS(language='EN', device=device),
+    'ES': TTS(language='ES', device=device),
+    'FR': TTS(language='FR', device=device),
+    'ZH': TTS(language='ZH', device=device),
+    'JP': TTS(language='JP', device=device),
+    'KR': TTS(language='KR', device=device),
+}
 
 
 class WhisperSpeechTTS:
