@@ -39,6 +39,8 @@ class WhisperSpeechTTS:
             atoks = self.pipe.s2a.generate(stoks, self.pipe.default_speaker)
             audio = self.pipe.vocoder.decode(atoks)
             return audio.cpu().numpy()
+        else if language == 'ja':
+            return self.models['jp'].tts_to_file(llm_output, self.models['jp'].hps.data.spk2id['JP'], None, speed=speed)
         else:
             return self.models[language].tts_to_file(llm_output, self.models[language].hps.data.spk2id[language.upper()], None, speed=speed)
 
