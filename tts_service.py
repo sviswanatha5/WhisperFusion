@@ -11,14 +11,15 @@ from transformers import pipeline
 from melo.api import TTS
 
 device="cuda:1"
+speed = 1.0
 models = {
-    'EN': TTS(language='EN', device=device),
-    'ES': TTS(language='ES', device=device),
-    'FR': TTS(language='FR', device=device),
-    'ZH': TTS(language='ZH', device=device),
-    'JP': TTS(language='JP', device=device),
-    'KR': TTS(language='KR', device=device),
+    'es': TTS(language='ES', device=device),
+    'fr': TTS(language='FR', device=device),
+    'zh': TTS(language='ZH', device=device),
+    'jp': TTS(language='JP', device=device),
+    'kr': TTS(language='KR', device=device),
 }
+speaker_ids = models['EN'].hps.data.spk2id
 
 
 class WhisperSpeechTTS:
@@ -39,6 +40,7 @@ class WhisperSpeechTTS:
         for _ in tqdm(range(3), desc="Warming up"):
             warmup = time.time()
             self.pipe.generate("Hello, I am warming up.")
+            models['fr'].tts_to_file("Hello, I am warming up.", speaker_ids['fr'].hps.data.spk2id['FR'], None, speed=speed)
             final = time.time() - warmup
             logging.info(f"[WhisperSpeech INFO:] Inference finished in {final}")
         logging.info("[WhisperSpeech INFO:] Warmed up Whisper Speech torch compile model. Connect to the WebGUI now.")
