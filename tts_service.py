@@ -11,7 +11,7 @@ from transformers import pipeline
 from melo.api import TTS
 
 device="cuda:1"
-speed = 2.5
+speed = 10.0
     
 
 
