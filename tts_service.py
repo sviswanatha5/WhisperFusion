@@ -41,7 +41,8 @@ class WhisperSpeechTTS:
         for _ in tqdm(range(3), desc="Warming up"):
             warmup = time.time()
             self.pipe.generate("Hello, I am warming up.")
-            self.models['fr'].tts_to_file("Hello, I am warming up.", self.models['fr'].hps.data.spk2id['FR'], None, speed=speed)
+            typecheck = self.models['fr'].tts_to_file("Hello, I am warming up.", self.models['fr'].hps.data.spk2id['FR'], None, speed=speed)
+            logging.info(f"Checking type of output: {type(typecheck)}")
             final = time.time() - warmup
             logging.info(f"[WhisperSpeech INFO:] Inference finished in {final}")
         logging.info("[WhisperSpeech INFO:] Warmed up Whisper Speech torch compile model. Connect to the WebGUI now.")
