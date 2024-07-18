@@ -11,7 +11,7 @@ from transformers import pipeline
 from melo.api import TTS
 
 device="cuda:1"
-speed = 2.5
+speed = 1.0
     
 
 
@@ -21,7 +21,6 @@ class WhisperSpeechTTS:
 
     def initialize_model(self):
         self.pipe = Pipeline(t2s_ref='collabora/whisperspeech:t2s-v1.95-medium-7lang.model', s2a_ref='collabora/whisperspeech:s2a-v1.95-medium-7lang.model', torch_compile=True, device="cuda:1")
-        self.language_detection = pipeline("text-classification", model="papluca/xlm-roberta-base-language-detection")
         self.models = {
             'es': TTS(language='ES', device=device),
             'fr': TTS(language='FR', device=device),
