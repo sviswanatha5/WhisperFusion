@@ -12,14 +12,7 @@ from melo.api import TTS
 
 device="cuda:1"
 speed = 1.0
-models = {
-    'es': TTS(language='ES', device=device),
-    'fr': TTS(language='FR', device=device),
-    'zh': TTS(language='ZH', device=device),
-    'jp': TTS(language='JP', device=device),
-    'kr': TTS(language='KR', device=device),
-}
-speaker_ids = models['EN'].hps.data.spk2id
+    
 
 
 class WhisperSpeechTTS:
@@ -31,6 +24,14 @@ class WhisperSpeechTTS:
         self.language_detection = pipeline("text-classification", model="papluca/xlm-roberta-base-language-detection")
         self.languages = {"English": 'en', "French": 'fr', "Spanish": 'es', "Polish": 'pl'}
 
+        self.models = {
+            'es': TTS(language='ES', device=device),
+            'fr': TTS(language='FR', device=device),
+            'zh': TTS(language='ZH', device=device),
+            'jp': TTS(language='JP', device=device),
+            'kr': TTS(language='KR', device=device),
+        }
+
         self.last_llm_response = None
 
     def run(self, host, port, audio_queue=None, should_send_server_ready=None):
@@ -40,7 +41,7 @@ class WhisperSpeechTTS:
         for _ in tqdm(range(3), desc="Warming up"):
             warmup = time.time()
             self.pipe.generate("Hello, I am warming up.")
-            models['fr'].tts_to_file("Hello, I am warming up.", speaker_ids['fr'].hps.data.spk2id['FR'], None, speed=speed)
+            self.models['fr'].tts_to_file("Hello, I am warming up.", self.models['fr'].hps.data.spk2id['FR'], None, speed=speed)
             final = time.time() - warmup
             logging.info(f"[WhisperSpeech INFO:] Inference finished in {final}")
         logging.info("[WhisperSpeech INFO:] Warmed up Whisper Speech torch compile model. Connect to the WebGUI now.")
