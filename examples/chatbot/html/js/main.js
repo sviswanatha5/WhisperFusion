@@ -315,7 +315,6 @@ function initWebSocket() {
             } else {
                 currently_playing = null;
                 audio_playing = false;
-                current_message_id++;
             }
             
         });
