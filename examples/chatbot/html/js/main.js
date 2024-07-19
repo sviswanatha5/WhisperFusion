@@ -58,6 +58,7 @@ function toggleMic() {
     else if (audio_state == 0) {
         stopRecording();
         current_message_id++;
+        audio_streams = audio_streams.filter(a => a[0] !== current_message_id)
         if (audio_playing) {
             currently_playing.stop();
             audio_playing = false;
@@ -222,6 +223,7 @@ function initWebSocket() {
       } else if ("segments" in data) {
         if (new_transcription_element_state) {
             current_message_id++;
+            audio_streams = audio_streams.filter(a => a[0] !== current_message_id)
             if (audio_playing) {
                 currently_playing.stop();
                 audio_playing = false;
