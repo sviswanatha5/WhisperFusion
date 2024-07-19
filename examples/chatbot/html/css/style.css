@@ -551,7 +551,28 @@ summary {
   margin-bottom: 20px;
 }
 
-/* Control container for the microphone button */
 .control-container {
-  text-align: center;
+  width: 100px;
+  height: 100px;
+  background-color: #0B9EDA;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.control-container.active {
+  background-color: #FF4B5C;
+}
+
+.control-container img {
+  width: 50px;
+  transition: transform 0.3s;
+}
+
+.control-container.active img {
+  transform: scale(1.1);
 }

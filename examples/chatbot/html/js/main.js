@@ -32,20 +32,59 @@ var current_message_id = null;
 var currently_playing = null;
 var blacklist = [];
 var unique_id = null;
-var input_language = "English";
-var output_language = "English";
+var input_language = "en";
+var output_language = "en";
+var tts_sampling_rate = 24000;
+var micOn = false;
+var audioQueueState = 0;
 
 let languageMap = {}
 languageMap['English'] = 'en';
 languageMap['French'] = 'fr';
-languageMap['Chinese'] = 'zh'
+languageMap['Mandarin'] = 'zh';
+languageMap['Spanish'] = 'es';
+languageMap['Japanese'] = 'ja';
 
 initWebSocket();
+
+function toggleMic() {
+    const controlContainer = document.getElementById('control-container');
+    controlContainer.classList.toggle('active');
+    if (!micOn) {
+        startRecording();
+        micOn = true;
+    }
+    else if (audio_state == 0) {
+        stopRecording();
+        if (current_message_id != null) {
+            blacklist.push(current_message_id);
+            audio_streams = audio_streams.filter(a => a[0] !== current_message_id);
+        }
+        if (audio_playing) {
+            currently_playing.stop();
+            audio_playing = false;
+            current_message_id = null;
+        }
+    }
+    else {
+        audio_state = 0;
+    }
+    
+}
 
 // Function to toggle dropdown visibility
 function toggleDropdown(dropdownId) {
     var dropdown = document.getElementById(dropdownId);
     dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+}
+
+function onAudioOutputChange() {
+    if (output_language != 'en') {
+        tts_sampling_rate = 40000
+    }
+    else {
+        tts_sampling_rate = 24000
+    }
 }
 
 // Function to select a language and update the button text
@@ -67,7 +106,9 @@ function onOutputChange(val) {
         input_language: input_language,
         output_language: output_language,
     }));
+    onAudioOutputChange()
     console.log("OUTPUT CHANGE: " + output_language)
+    console.log("AUDIO SAMPLING CHANGED TO: " + tts_sampling_rate)
 }
 
 
@@ -110,7 +151,7 @@ const start_recording = async () => {
                   return;
                 }
                 const audioData = event.data;
-                if (websocket && websocket.readyState === WebSocket.OPEN && audio_state == 0) {
+                if (websocket && websocket.readyState === WebSocket.OPEN && audio_state == 0 && audioQueueState == 0) {
                     websocket.send(audioData.buffer);
                     console.log("send data")
                 }
@@ -128,27 +169,27 @@ const handleStartRecording = async () => {
 };
 
 const startRecording = async () => {
-    document.getElementById("instructions-text").style.display = "none";
-    document.getElementById("control-container").style.backgroundColor = "white";
+    // document.getElementById("instructions-text").style.display = "none";
+    // document.getElementById("control-container").style.backgroundColor = "white";
 
     AudioContext = window.AudioContext || window.webkitAudioContext;
     audioContext = new AudioContext({ latencyHint: 'interactive', sampleRate: 16000 });
 
-    audioContext_tts = new AudioContext({ sampleRate: 24000 });
+    audioContext_tts = new AudioContext({ sampleRate: tts_sampling_rate });
 
-    document.getElementById("recording-stop-btn").style.display = "block";
-    document.getElementById("recording-dot").style.display = "block";
-    document.getElementById("recording-line").style.display = "block";
-    document.getElementById("recording-time").style.display = "block";
+    // document.getElementById("recording-stop-btn").style.display = "block";
+    // document.getElementById("recording-dot").style.display = "block";
+    // document.getElementById("recording-line").style.display = "block";
+    // document.getElementById("recording-time").style.display = "block";
     
-    intervalFunction = setInterval(recording_timer, 1000);
+    // intervalFunction = setInterval(recording_timer, 1000);
 
     await handleStartRecording();
 };
 
 function stopRecording() {
     audio_state = 1;
-    clearInterval(intervalFunction);
+    // clearInterval(intervalFunction);
 }
 
 function initWebSocket() {
@@ -209,11 +250,13 @@ function initWebSocket() {
             new_transcription_element(you_name, img_src);
             new_text_element("<p>" +  data["segments"][0].text + "</p>", "transcription-" + available_transcription_elements);
             new_transcription_element_state = false;
+            
         }
         document.getElementById("transcription-" + available_transcription_elements).innerHTML = "<p>" + data["segments"][0].text + "</p>"; 
 
         if (data["eos"] == true) {
             new_transcription_element_state = true;
+            audioQueueState = 1;
         }
       } else if ("llm_output" in data) {
 
@@ -244,7 +287,8 @@ function initWebSocket() {
           }));
     }
     websocket_audio.onclose = function(e) { }
-    websocket_audio.onmessage = function(e) {
+    websocket_audio.onmessage = function (e) {
+        audioQueueState = 0;
         available_audio_elements++;
         // var data = JSON.parse(e.data);
         
@@ -260,7 +304,7 @@ function initWebSocket() {
         } else if (includes){
             return
         }
-        let audioBuffer = audioContext_tts.createBuffer(1, float32Array.length, 24000);
+        let audioBuffer = audioContext_tts.createBuffer(1, float32Array.length, tts_sampling_rate);
         audioBuffer.getChannelData(0).set(float32Array);
 
         //new_whisper_speech_audio_element("audio-" + available_audio_elements, Math.floor(audioBuffer.duration));
