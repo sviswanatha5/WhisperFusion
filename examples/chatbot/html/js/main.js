@@ -288,7 +288,7 @@ function initWebSocket() {
         // var data = JSON.parse(e.data);
         
         let float32Array = new Float32Array(e.data);
-        const uint8 = new Uint32Array(e.data)
+        const uint8 = new Uint8Array(e.data)
         let message_id = Math.floor(uint8[3]);
         
         console.log("message_id: " + message_id);
