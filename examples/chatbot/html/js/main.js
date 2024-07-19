@@ -57,9 +57,12 @@ function toggleMic() {
     }
     else if (audio_state == 0) {
         stopRecording();
-        if (audio_playing) {
+        if (current_message_id == message_id) {
             current_message_id++;
             audio_streams = audio_streams.filter(a => a[0] !== current_message_id)
+        }
+        if (audio_playing) {
+            
             currently_playing.stop();
             audio_playing = false;
         }
