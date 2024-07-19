@@ -288,8 +288,8 @@ function initWebSocket() {
         // var data = JSON.parse(e.data);
         
         let float32Array = new Float32Array(e.data);
-        const uint8 = new Uint8Array(e.data)
-        let message_id = Math.floor(uint8[0]);
+        const uint8 = new Uint32Array(e.data)
+        let message_id = Math.floor(uint8[3]);
         
         console.log("message_id: " + message_id);
         console.log("current_message_id: " + current_message_id);
@@ -315,7 +315,7 @@ function initWebSocket() {
             } else {
                 currently_playing = null;
                 audio_playing = false;
-                current_message_id = null;
+                current_message_id++;
             }
             
         });
