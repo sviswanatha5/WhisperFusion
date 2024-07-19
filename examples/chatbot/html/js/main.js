@@ -28,7 +28,7 @@ var audio_sources = [];
 var audio_streams = [];
 var audio_source = null;
 var audio_playing = false;
-var current_message_id = null;
+var current_message_id = 0;
 var currently_playing = null;
 var blacklist = [];
 var unique_id = null;
@@ -37,6 +37,7 @@ var output_language = "en";
 var tts_sampling_rate = 24000;
 var micOn = false;
 var audioQueueState = 0;
+
 
 let languageMap = {}
 languageMap['English'] = 'en';
@@ -56,14 +57,10 @@ function toggleMic() {
     }
     else if (audio_state == 0) {
         stopRecording();
-        if (current_message_id != null) {
-            blacklist.push(current_message_id);
-            audio_streams = audio_streams.filter(a => a[0] !== current_message_id);
-        }
+        current_message_id++;
         if (audio_playing) {
             currently_playing.stop();
             audio_playing = false;
-            current_message_id = null;
         }
     }
     else {
@@ -224,14 +221,10 @@ function initWebSocket() {
         }
       } else if ("segments" in data) {
         if (new_transcription_element_state) {
-            if (current_message_id != null) {
-                blacklist.push(current_message_id);
-                audio_streams = audio_streams.filter(a => a[0] !== current_message_id);
-            }
+            current_message_id++;
             if (audio_playing) {
                 currently_playing.stop();
                 audio_playing = false;
-                current_message_id = null;
             }
             available_transcription_elements = available_transcription_elements + 1;
 
@@ -293,15 +286,13 @@ function initWebSocket() {
         // var data = JSON.parse(e.data);
         
         let float32Array = new Float32Array(e.data);
-        const uint32 = new Uint32Array(e.data)
-        let message_id = Math.floor(uint32[0]);
+        const uint8 = new Uint8Array(e.data)
+        let message_id = Math.floor(uint8[0]);
+        
         console.log("message_id: " + message_id);
         console.log("current_message_id: " + current_message_id);
         console.log("Blacklist: " + blacklist);
-        includes = blacklist.includes(message_id);
-        if (current_message_id == null && !includes) {
-            current_message_id = message_id;
-        } else if (includes){
+        if (message_id < current_message_id) {
             return
         }
         let audioBuffer = audioContext_tts.createBuffer(1, float32Array.length, tts_sampling_rate);
@@ -322,7 +313,6 @@ function initWebSocket() {
             } else {
                 currently_playing = null;
                 audio_playing = false;
-                //blacklist.push(current_message_id);
                 current_message_id = null;
             }
             
