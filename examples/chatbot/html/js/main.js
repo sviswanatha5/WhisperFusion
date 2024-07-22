@@ -130,6 +130,11 @@ const start_recording = async () => {
         if (audioContext) {
             
             await audioContext.resume();
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert("Your browser does not support audio recording.");
+                return;
+            }
             
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             
