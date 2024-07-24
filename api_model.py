@@ -65,8 +65,8 @@ class CustomLLMAPI:
         logging.info(f"STARTING LLM WEBSOCKET")
         with serve(
             functools.partial(self.run, ), 
-            ssl=ssl_context,
-            host, port
+            
+            host, port, ssl=ssl_context,
             ) as server:
             server.serve_forever()
 
