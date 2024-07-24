@@ -1,35 +1,20 @@
 # WhisperFusion
 
-<h2 align="center">
-  <a href="https://www.youtube.com/watch?v=_PnaP0AQJnk"><img
-src="https://img.youtube.com/vi/_PnaP0AQJnk/0.jpg" style="background-color:rgba(0,0,0,0);" height=300 alt="WhisperFusion"></a>
-  <br><br>Seamless conversations with AI (with ultra-low latency)<br><br>
-</h2>
-
-Welcome to WhisperFusion. WhisperFusion builds upon the capabilities of
-the [WhisperLive](https://github.com/collabora/WhisperLive) and
-[WhisperSpeech](https://github.com/collabora/WhisperSpeech) by
-integrating Mistral, a Large Language Model (LLM), on top of the
-real-time speech-to-text pipeline. Both LLM and
-Whisper are optimized to run efficiently as TensorRT engines, maximizing
-performance and real-time processing capabilities. While WhiperSpeech is 
-optimized with torch.compile.
 
 ## Features
 
 - **Real-Time Speech-to-Text**: Utilizes OpenAI WhisperLive to convert
   spoken language into text in real-time.
 
-- **Large Language Model Integration**: Adds Mistral, a Large Language
-  Model, to enhance the understanding and context of the transcribed
-  text.
-
+- **Large Language Model Integration**: Adds internllm LLM currently, but can be changed easily through an API call
+- **Multilingual Text-to-Speech**: Utilizes Whisper TTS model for english TTS, and uses MeloTTS' models for Spanish, French, Mandarin, and Japanese translations
 - **TensorRT Optimization**: Both LLM and Whisper are optimized to
   run as TensorRT engines, ensuring high-performance and low-latency
   processing.
 - **torch.compile**: WhisperSpeech uses torch.compile to speed up 
   inference which makes PyTorch code run faster by JIT-compiling PyTorch
   code into optimized kernels.
+
 
 ## Hardware Requirements
 
@@ -38,7 +23,6 @@ optimized with torch.compile.
 
 
 ## Getting Started
-We provide a Docker Compose setup to streamline the deployment of the pre-built TensorRT-LLM docker container. This setup includes both Whisper and Phi converted to TensorRT engines, and the WhisperSpeech model is pre-downloaded to quickly start interacting with WhisperFusion. Additionally, we include a simple web server for the Web GUI.
 
 - Build and Run with docker compose for RTX 3090 and RTX
 ```bash
@@ -55,5 +39,5 @@ docker compose up
 
 
 **Note**
-- Since this code is reliant on an API call for the LLM response, whenever there is a change to the API website, the copy script must be rerun, and the run-whisperfusion.sh file must be changeed to reflect this
+- Since this code is reliant on an API call for the LLM response, whenever there is a change to the API website, the copy script must be rerun, and the run-whisperfusion.sh file must be changed to reflect this
 
