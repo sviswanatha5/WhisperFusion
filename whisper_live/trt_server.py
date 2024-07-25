@@ -77,8 +77,7 @@ class TranscriptionServer:
     def isJson(self, str):
         try:
             json.loads(str)
-        except Exception as e:
-            # logging.info(f"JSON EXCEPTION: {e}")
+        except Exception:
             return False 
         
         return True
@@ -125,7 +124,6 @@ class TranscriptionServer:
             return
         
         transcriber = WhisperTRTLLM(whisper_tensorrt_path, assets_dir="assets", device="cuda")
-        logging.info(f"New transcriber: {transcriber}")
 
         client = ServeClient(
             websocket,
@@ -149,7 +147,6 @@ class TranscriptionServer:
                 frame_data = websocket.recv()
                 if self.isJson(frame_data):
                     dumps = json.loads(frame_data)
-                    logging.info(f"Dumps: {dumps}")
                     self.clients[websocket].input_language = dumps["input_language"]
                     self.clients[websocket].output_language = dumps["output_language"]
                     continue
@@ -172,8 +169,6 @@ class TranscriptionServer:
                     self.clients[websocket].set_eos(False)
 
                 except Exception as e:
-                    logging.info("TEST::")
-                    logging.error(traceback.format_exc())
                     logging.error(e)
                     return
                 self.clients[websocket].add_frames(frame_np)
@@ -184,7 +179,6 @@ class TranscriptionServer:
                         del conversation_history[self.clients[websocket].client_uid]
                     self.clients[websocket].disconnect()
                     logging.warning(f"{self.clients[websocket]} Client disconnected due to overtime.")
-                    logging.info(f"Refernces to transcriber: {gc.get_referrers(self.clients[websocket].transcriber)}")
                     self.clients[websocket].cleanup()
                     del self.clients[websocket]
                     self.clients_start_time.pop(websocket)
@@ -196,13 +190,8 @@ class TranscriptionServer:
                 logging.exception(e)
                 if self.clients[websocket].client_uid in conversation_history:
                         del conversation_history[self.clients[websocket].client_uid]
-                logging.info(f"Refernces to transcriber: {gc.get_referrers(self.clients[websocket].transcriber)}")
                 uid = self.clients[websocket].client_uid
-                logging.info(f"self.clients[websocket].client_uid: {uid}")
-                logging.info(f"EVENTS: {events}")
-                logging.info(f"events ID: {hex(id(events))}")
                 if self.clients[websocket].client_uid in events:
-                    logging.info("Setting client UID on refresh")
                     events[self.clients[websocket].client_uid].set()
                 self.clients[websocket].cleanup()
                 del self.clients[websocket]
@@ -385,7 +374,6 @@ class ServeClient:
                     if len(self.llm_queue[self.client_uid]) > 0:
                         temp_queue = self.llm_queue[self.client_uid]
                         llm_response = temp_queue.pop(0)
-                        logging.info(f"Popped value: {llm_response}")
                         self.websocket.send(json.dumps(llm_response))
                         self.llm_queue[self.client_uid] = temp_queue
             except queue.Empty:

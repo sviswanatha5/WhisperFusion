@@ -49,12 +49,9 @@ class WhisperSpeechTTS:
         self.initialize_model()
         logging.info("\n[WhisperSpeech INFO:] Warming up torch compile model. Please wait ...\n")
         for _ in tqdm(range(3), desc="Warming up"):
-            warmup = time.time()
             self.pipe.generate("Hello, I am warming up.")
             for key, value in self.models.items():
                 value.tts_to_file("Hello, I am warming up.", value.hps.data.spk2id[key.upper()], None, speed=speed)
-            final = time.time() - warmup
-            logging.info(f"[WhisperSpeech INFO:] Inference finished in {final}")
         logging.info("[WhisperSpeech INFO:] Warmed up Whisper Speech torch compile model. Connect to the WebGUI now.")
         should_send_server_ready.value = True
         with serve(
@@ -76,15 +73,9 @@ class WhisperSpeechTTS:
                 continue
             if not user in audio_queue or len(audio_queue[user]) == 0:
                 continue
-            logging.info(f"audio_queue {audio_queue}")
             temp = audio_queue[user]
             llm_response = temp.pop(0)
             audio_queue[user] = temp
-            logging.info(f"llm_response: {llm_response}")
-            # if audio_queue.qsize() != 0:
-            #     continue
-            
-            # check if this websocket exists
             try:
                 websocket.ping()
             except Exception as e:
@@ -98,20 +89,14 @@ class WhisperSpeechTTS:
             if not last_message_id:
                 last_message_id = message_id
             
-            logging.info(f"MESSAGE_ID: {message_id}")
             if message_id > last_message_id:
                 last_message_id = message_id
-            def should_abort():
-                if not audio_queue.empty(): raise TimeoutError()
-            # only process if the output updated
             try:
                 if self.last_llm_response != llm_output.strip():
-                    logging.info(f"Audio getting processed: {llm_output.strip()} .\n\n")
 
                     start = time.time()
 
                     help = llm_response["language"]
-                    logging.info(f"Detected language: {help}")
                     self.output_audio = self.generate_text(help, llm_output)
                     inference_time = time.time() - start
                     logging.info(f"[WhisperSpeech INFO:] TTS inference done in {inference_time} ms for  SENTENCE: {llm_output.strip()}.\n\n")

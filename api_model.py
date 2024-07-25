@@ -79,22 +79,17 @@ class CustomLLMAPI:
             ws = websocket.WebSocket()
                                     
             ws.connect(self.api_url)
-            logging.info(f"WEBSOCKET CONNECTED")
             ws.send(json.dumps(query))
             
-            logging.info(f"SUCCESSFULY SENT: {query}")
+            logging.info(f"[LLM Server]: Successfully Sent: {query}")
             
             while not event.is_set():
                 try:
-                    logging.info(f"CLIENT SOCKET: {client_socket.id}, type: {type(client_socket)}")
                     client_socket.ping()
                     client_socket.send("")
                 except Exception as e:
                     logging.exception(e)
-                    logging.info("Encountered refresh")
-                    # flag = False
                     event.set()
-                #logging.info(f"Event {event} status: {event.is_set()}")
             
                 llm_response =  ws.recv()
                 if not llm_response:
@@ -121,44 +116,15 @@ class CustomLLMAPI:
                 
                 if currPunc:
                     current_response += split[0] + currPunc
-                    logging.info(f"CURRENT RESPONSE: {current_response}")
                     if not user in self.audio_queue:
                         self.audio_queue[user] = []
                     self.audio_queue[user] += [{"message_id": message_id, "llm_output": current_response, "language": language}]
-                    logging.info(f"SENT TO AUDIO_QUEUE: {current_response}")
                     total_response += current_response
 
                     current_response = ""
                 else:
                     current_response += llm_response
-                    
-                
-                # if any(char in llm_response for char in ['.', '?', '!']):
-
-                #     if "." in llm_response:
-                #         split = llm_response.split(".")
-                #         punc = "."
-                #     elif "?" in llm_response:
-                #         split = llm_response.split("?")
-                #         punc = "?"
-                #     else:
-                #         split = llm_response.split("!")
-                #         punc = "!"
-
-                #     current_response += split[0] + punc
-                #     logging.info(f"CURRENT RESPONSE: {current_response}")
-                #     if not user in self.audio_queue:
-                #         self.audio_queue[user] = []
-                #     self.audio_queue[user] += [{"message_id": message_id, "llm_output": current_response, "language": language}]
-                #     logging.info(f"SENT TO AUDIO_QUEUE: {current_response}")
-                #     total_response += current_response
-
-                #     current_response = ""
-                # else:
-                #     current_response += llm_response
-                    
-                logging.info(f"RESPONSE: {llm_response}")
-                
+                                    
             ws.close()
             if self.eos == False:
                 self.eos = True
@@ -192,14 +158,6 @@ class CustomLLMAPI:
             if not options:
                 options = websocket.recv()
                 options = json.loads(options)
-                logging.info(f"open with options: {options}")
-            # try:
-            #     websocket.send("")
-            #     logging.info(f"Received websocket at : {websocket}")
-            # except Exception as e:
-            #     logging.info("Connection to websocket closed")
-            #     if user in self.events:
-            #         self.events[user].set()
 
             if transcription_output and user in self.events:
                 self.events[user].set()
@@ -220,20 +178,17 @@ class CustomLLMAPI:
                 history_prompt = self.conversation_history[user].get_formatted_history(transcription_output["language"], formatted_prompt)
                 
                 query = [{"role": "user", "content": history_prompt}]
-                logging.info(f"Sending request to: {self.api_url}")
+                logging.info(f"[LLM Client]: Sending request to {self.api_url}")
                 
                 if user in self.events:
                     self.events[user].set()
                 self.events[user] = threading.Event()
-                logging.info(f"Added to events: {self.events}")
                 
                 websocket.ping()
 
-                logging.info(f"Websocket: {websocket.id}")
 
                 thread = threading.Thread(target=self.query, args=(query, user, message_id, websocket, transcription_output["language"]))
                 thread.start()
-                # self.query(query, user, message_id, websocket)
                 logging.info("Continuing")
 
                 message_id += 1

@@ -29,14 +29,6 @@ def parse_arguments():
                         type=str,
                         required=True,
                         help='RAGflow API URL')
-    # parser.add_argument('--api_key',
-    #                     type=str,
-    #                     required=True,
-    #                     help='RAGflow API Key')
-    # parser.add_argument('--user_id',
-    #                     type=str,
-    #                     required=True,
-    #                     help='User ID for RAGflow API')
     return parser.parse_args()
 
 if __name__ == "__main__":
