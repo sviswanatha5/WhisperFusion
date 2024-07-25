@@ -39,9 +39,7 @@ if __name__ == "__main__":
         sys.exit(0)
 
     multiprocessing.set_start_method('spawn')
-    
-    lock = multiprocessing.Lock()
-    
+        
     manager = Manager()
     shared_output = manager.list()
     should_send_server_ready = Value(ctypes.c_bool, False)
