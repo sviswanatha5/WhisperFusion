@@ -60,13 +60,10 @@ class CustomLLMAPI:
         self.llm_queue = llm_queue
         self.conversation_history = conversation_history
         self.events = {}
-        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        ssl_context.load_cert_chain("rootCert.pem", "rootCert.pem")
         logging.info(f"STARTING LLM WEBSOCKET")
         with serve(
             functools.partial(self.run, ), 
-            
-            host, port, ssl=ssl_context,
+            host, port
             ) as server:
             server.serve_forever()
 
