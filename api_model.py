@@ -170,6 +170,7 @@ class CustomLLMAPI:
             if self.last_prompt == prompt and transcription_output["eos"]:
                 self.eos = False
                 if prompt == "Stop." or prompt == "Stop":
+                    message_id += 1
                     continue
                 self.conversation_history[user].add_to_history("user", prompt)
                 
