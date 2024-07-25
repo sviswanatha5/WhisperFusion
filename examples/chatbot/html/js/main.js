@@ -250,6 +250,10 @@ function initWebSocket() {
             new_transcription_element_state = false;
             
         }
+        if (audio_playing) {
+            currently_playing.stop();
+            audio_playing = false;
+        }
         document.getElementById("transcription-" + available_transcription_elements).innerHTML = "<p>" + data["segments"][0].text + "</p>"; 
 
         if (data["eos"] == true) {
@@ -296,8 +300,9 @@ function initWebSocket() {
         
         console.log("message_id: " + message_id);
         console.log("current_message_id: " + current_message_id);
-        console.log("Blacklist: " + blacklist);
+        console.log("Audio streams: " + audio_streams);
         if (message_id < current_message_id) {
+            console.log("Blocked message id : " + message_id);
             return
         }
         let audioBuffer = audioContext_tts.createBuffer(1, float32Array.length, tts_sampling_rate);
