@@ -297,9 +297,7 @@ function initWebSocket() {
         console.log("message_id: " + message_id);
         console.log("current_message_id: " + current_message_id);
         console.log("Blacklist: " + blacklist);
-        if (current_message_id > message_id) {
-            current_message_id = message_id
-        } else if (message_id < current_message_id) {
+        if (message_id < current_message_id) {
             return
         }
         let audioBuffer = audioContext_tts.createBuffer(1, float32Array.length, tts_sampling_rate);
