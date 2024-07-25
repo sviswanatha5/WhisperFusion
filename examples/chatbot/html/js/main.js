@@ -57,6 +57,7 @@ function toggleMic() {
     }
     else if (audio_state == 0) {
         stopRecording();
+        blacklist.push(current_message_id);
         if (audio_playing) {
             currently_playing.stop();
             audio_playing = false;
@@ -301,8 +302,7 @@ function initWebSocket() {
         console.log("message_id: " + message_id);
         console.log("current_message_id: " + current_message_id);
         console.log("Audio streams: " + audio_streams);
-        if (message_id < current_message_id) {
-            console.log("Blocked message id : " + message_id);
+        if ((message_id < current_message_id) || (blacklist.includes(message_id))) {
             return
         }
         let audioBuffer = audioContext_tts.createBuffer(1, float32Array.length, tts_sampling_rate);
