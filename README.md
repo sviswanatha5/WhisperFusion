@@ -1,4 +1,4 @@
-# AT&T Multilingual STT/TTS model 
+# Multilingual STT/TTS model 
 
 
 ## Features
@@ -53,4 +53,7 @@ Below is a low-level explanation of how the code works and how the backend inter
 6. The LLM's response is streamed, meaning that it comes in word-by-word. Once we get enough words (signaled by punctuation in the response), we will send this chunk of words to an audio queue to get translated into audio. Another queue updates every word, and this is used to generate text on the UI. 
 7. Depending on what language output the user selects, that specific model is fed data from the audio queue. The model will then output a byte_array, which represents audio data. This array is sent back to the website through a websocket. A message ID is also sent with the audio byte_array to help with interruptions. 
 8. With the audio byte_array sent to the JS, the website will process it and send the audio chunks to a buffer, which will then play the audio. 
+
+## Acknowledgements
+We would like to acknowledge Collabora for their WhisperFusion model, which our model is heavily based on. We would also like to acknowledge MeloTTS, whose models are used for non-english TTS. 
 
