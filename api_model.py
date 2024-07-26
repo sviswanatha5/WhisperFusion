@@ -147,61 +147,57 @@ class CustomLLMAPI:
         options = None
         message_id = 0
         while True:
-            try:
 
-                transcription_output = self.transcription_queue.get()
-                if self.transcription_queue.qsize() != 0:
-                    continue
-                
-                prompt = transcription_output['prompt'].strip()
-                user = transcription_output['uid']
-
-                if not options:
-                    options = websocket.recv()
-                    options = json.loads(options)
-
-                if transcription_output and user in self.events:
-                    self.events[user].set()
-                
-                websocket.ping()
-                
-                if user not in self.conversation_history:
-                    self.conversation_history[user] = ConversationHistory()
-                    
-                if self.last_prompt == prompt and transcription_output["eos"]:
-                    self.eos = False
-                    if prompt == "Stop." or prompt == "Stop":
-                        message_id += 1
-                        continue
-                    self.conversation_history[user].add_to_history("user", prompt)
-                    
-                    messages = [{"speaker": "user", "message": prompt}]
-                    formatted_prompt = messages[-1]['message']
-                    history_prompt = self.conversation_history[user].get_formatted_history(transcription_output["language"], formatted_prompt)
-                    
-                    query = [{"role": "user", "content": history_prompt}]
-                    logging.info(f"[LLM Client]: Sending request to {self.api_url}")
-                    
-                    if user in self.events:
-                        self.events[user].set()
-                    self.events[user] = threading.Event()
-                    
-                    try:
-                        websocket.ping()
-                    except Exception as e:
-                        logging.error(f"[LLM Client]: Websocket is closed: {e}")
-
-                    
-                    try:
-                        thread = threading.Thread(target=self.query, args=(query, user, message_id, websocket, transcription_output["language"]))
-                        thread.start()
-                    except Exception as e:
-                        logging.error("[LLM Client]: Thread failed to start {e}")
-
-                    message_id += 1
-                
-                self.last_prompt = prompt
-            except Exception as e:
-                logging.error(f"[LLM Client]: Error {e}")
+            transcription_output = self.transcription_queue.get()
+            if self.transcription_queue.qsize() != 0:
                 continue
+            
+            prompt = transcription_output['prompt'].strip()
+            user = transcription_output['uid']
+
+            if not options:
+                options = websocket.recv()
+                options = json.loads(options)
+
+            if transcription_output and user in self.events:
+                self.events[user].set()
+            
+            websocket.ping()
+            
+            if user not in self.conversation_history:
+                self.conversation_history[user] = ConversationHistory()
+                
+            if self.last_prompt == prompt and transcription_output["eos"]:
+                self.eos = False
+                if prompt == "Stop." or prompt == "Stop":
+                    message_id += 1
+                    continue
+                self.conversation_history[user].add_to_history("user", prompt)
+                
+                messages = [{"speaker": "user", "message": prompt}]
+                formatted_prompt = messages[-1]['message']
+                history_prompt = self.conversation_history[user].get_formatted_history(transcription_output["language"], formatted_prompt)
+                
+                query = [{"role": "user", "content": history_prompt}]
+                logging.info(f"[LLM Client]: Sending request to {self.api_url}")
+                
+                if user in self.events:
+                    self.events[user].set()
+                self.events[user] = threading.Event()
+                
+                try:
+                    websocket.ping()
+                except Exception as e:
+                    logging.error(f"[LLM Client]: Websocket is closed: {e}")
+
+                
+                try:
+                    thread = threading.Thread(target=self.query, args=(query, user, message_id, websocket, transcription_output["language"]))
+                    thread.start()
+                except Exception as e:
+                    logging.error("[LLM Client]: Thread failed to start {e}")
+
+                message_id += 1
+            
+            self.last_prompt = prompt
             
