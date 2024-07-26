@@ -173,18 +173,18 @@ class TranscriptionServer:
                     return
                 self.clients[websocket].add_frames(frame_np)
 
-                # elapsed_time = time.time() - self.clients_start_time[websocket]
-                # if elapsed_time >= self.max_connection_time:
-                #     if self.clients[websocket].client_uid in conversation_history:
-                #         del conversation_history[self.clients[websocket].client_uid]
-                #     self.clients[websocket].disconnect()
-                #     logging.warning(f"{self.clients[websocket]} Client disconnected due to overtime.")
-                #     self.clients[websocket].cleanup()
-                #     del self.clients[websocket]
-                #     self.clients_start_time.pop(websocket)
-                #     websocket.close()
-                #     del websocket
-                #     break
+                elapsed_time = time.time() - self.clients_start_time[websocket]
+                if elapsed_time >= self.max_connection_time:
+                    if self.clients[websocket].client_uid in conversation_history:
+                        del conversation_history[self.clients[websocket].client_uid]
+                    self.clients[websocket].disconnect()
+                    logging.warning(f"{self.clients[websocket]} Client disconnected due to overtime.")
+                    self.clients[websocket].cleanup()
+                    del self.clients[websocket]
+                    self.clients_start_time.pop(websocket)
+                    websocket.close()
+                    del websocket
+                    break
 
             except Exception as e:
                 logging.exception(e)

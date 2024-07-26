@@ -39,7 +39,7 @@ class ConversationHistory:
 
     def get_formatted_history(self, language, add_generation_prompt=True):
         template = """This is the current conversation history between a user and assistant: 
-        {% for message in messages %}{% if message['speaker'] == 'user' %}{{'user\n' + message['message'] + '\n'}}{% elif message['speaker'] == 'assistant' %}{{'assistant\n' + message['message'] + '\n' }}{% else %}{{ 'system\n' + message['message'] + '\n' }}{% endif %}{% endfor %}{% if add_generation_prompt %}{% endif %} 
+        {% for message in messages %}{% if message['speaker'] == 'user' %}{{'user: \n' + message['message'] + '\n'}}{% elif message['speaker'] == 'assistant' %}{{'assistant: \n' + message['message'] + '\n' }}{% else %}{{ 'system\n' + message['message'] + '\n' }}{% endif %}{% endfor %}{% if add_generation_prompt %}{% endif %} 
         Note: The conversation history is provided for context. Do not generate responses that involve both the user and the assistant in a loop. Respond only as the assistant.
         assistant
         Answer in """ + self.languages[language] + "\n"
@@ -147,52 +147,61 @@ class CustomLLMAPI:
         options = None
         message_id = 0
         while True:
+            try:
 
-            transcription_output = self.transcription_queue.get()
-            if self.transcription_queue.qsize() != 0:
-                continue
-            
-            prompt = transcription_output['prompt'].strip()
-            user = transcription_output['uid']
-
-            if not options:
-                options = websocket.recv()
-                options = json.loads(options)
-
-            if transcription_output and user in self.events:
-                self.events[user].set()
-            
-            websocket.ping()
-            
-            if user not in self.conversation_history:
-                self.conversation_history[user] = ConversationHistory()
-                
-            if self.last_prompt == prompt and transcription_output["eos"]:
-                self.eos = False
-                if prompt == "Stop." or prompt == "Stop":
-                    message_id += 1
+                transcription_output = self.transcription_queue.get()
+                if self.transcription_queue.qsize() != 0:
                     continue
-                self.conversation_history[user].add_to_history("user", prompt)
                 
-                messages = [{"speaker": "user", "message": prompt}]
-                formatted_prompt = messages[-1]['message']
-                history_prompt = self.conversation_history[user].get_formatted_history(transcription_output["language"], formatted_prompt)
-                
-                query = [{"role": "user", "content": history_prompt}]
-                logging.info(f"[LLM Client]: Sending request to {self.api_url}")
-                
-                if user in self.events:
+                prompt = transcription_output['prompt'].strip()
+                user = transcription_output['uid']
+
+                if not options:
+                    options = websocket.recv()
+                    options = json.loads(options)
+
+                if transcription_output and user in self.events:
                     self.events[user].set()
-                self.events[user] = threading.Event()
                 
                 websocket.ping()
+                
+                if user not in self.conversation_history:
+                    self.conversation_history[user] = ConversationHistory()
+                    
+                if self.last_prompt == prompt and transcription_output["eos"]:
+                    self.eos = False
+                    if prompt == "Stop." or prompt == "Stop":
+                        message_id += 1
+                        continue
+                    self.conversation_history[user].add_to_history("user", prompt)
+                    
+                    messages = [{"speaker": "user", "message": prompt}]
+                    formatted_prompt = messages[-1]['message']
+                    history_prompt = self.conversation_history[user].get_formatted_history(transcription_output["language"], formatted_prompt)
+                    
+                    query = [{"role": "user", "content": history_prompt}]
+                    logging.info(f"[LLM Client]: Sending request to {self.api_url}")
+                    
+                    if user in self.events:
+                        self.events[user].set()
+                    self.events[user] = threading.Event()
+                    
+                    try:
+                        websocket.ping()
+                    except Exception as e:
+                        logging.error(f"[LLM Client]: Websocket is closed: {e}")
 
+                    
+                    try:
+                        thread = threading.Thread(target=self.query, args=(query, user, message_id, websocket, transcription_output["language"]))
+                        thread.start()
+                    except Exception as e:
+                        logging.error("[LLM Client]: Thread failed to start {e}")
 
-                thread = threading.Thread(target=self.query, args=(query, user, message_id, websocket, transcription_output["language"]))
-                thread.start()
-                logging.info("Continuing")
-
-                message_id += 1
-            
-            self.last_prompt = prompt
+                    message_id += 1
+                
+                self.last_prompt = prompt
+            except Exception as e:
+                logging.error(f"[LLM Client]: Error {e}")
+                continue
             
