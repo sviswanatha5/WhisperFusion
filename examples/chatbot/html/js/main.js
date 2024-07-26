@@ -323,12 +323,14 @@ function initWebSocket() {
                     both = audio_streams.shift()
                     currently_playing = both[1]; 
                 }
-                if (audio_streams.length == 0) {
+                if (currently_playing) {
+                    currently_playing.start();
+                    audio_playing = true
+                } else {
                     currently_playing = null;
                     audio_playing = false;
                 }
-                currently_playing.start();
-                audio_playing = true
+                
             } else {
                 currently_playing = null;
                 audio_playing = false;
