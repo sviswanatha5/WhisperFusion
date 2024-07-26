@@ -58,6 +58,7 @@ function toggleMic() {
     else if (audio_state == 0) {
         stopRecording();
         blacklist.push(current_message_id);
+        audio_streams = audio_streams.filter(a => a[0] !== current_message_id)
         if (audio_playing) {
             currently_playing.stop();
             audio_playing = false;
@@ -319,17 +320,8 @@ function initWebSocket() {
             if (audio_streams.length > 0) {
                 both = audio_streams.shift()
                 currently_playing = both[1];
-                while (blacklist.includes(both[0]) && audio_streams.length > 0) {
-                    both = audio_streams.shift()
-                    currently_playing = both[1]; 
-                }
-                if (currently_playing) {
-                    currently_playing.start();
-                    audio_playing = true
-                } else {
-                    currently_playing = null;
-                    audio_playing = false;
-                }
+                currently_playing.start();
+                audio_playing = true;
                 
             } else {
                 currently_playing = null;
