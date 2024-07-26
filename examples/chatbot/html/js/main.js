@@ -317,7 +317,12 @@ function initWebSocket() {
         audio_source.connect(audioContext_tts.destination);
         audio_source.addEventListener('ended', () => {
             if (audio_streams.length > 0) {
-                currently_playing = audio_streams.shift()[1];
+                both = audio_streams.shift()
+                currently_playing = both[1];
+                while (blacklist.includes(both[0])) {
+                    both = audio_streams.shift()
+                    currently_playing = both[1]; 
+                }
                 currently_playing.start();
                 audio_playing = true
             } else {
