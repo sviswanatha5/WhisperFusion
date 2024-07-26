@@ -319,9 +319,13 @@ function initWebSocket() {
             if (audio_streams.length > 0) {
                 both = audio_streams.shift()
                 currently_playing = both[1];
-                while (blacklist.includes(both[0])) {
+                while (blacklist.includes(both[0]) && audio_streams.length > 0) {
                     both = audio_streams.shift()
                     currently_playing = both[1]; 
+                }
+                if (audio_streams.length == 0) {
+                    currently_playing = null;
+                    audio_playing = false;
                 }
                 currently_playing.start();
                 audio_playing = true
