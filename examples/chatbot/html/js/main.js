@@ -13,7 +13,7 @@ var recordingTime = 0;
 var server_state = 0;
 var websocket_audio = null;
 let audioContext_tts = null;
-var you_name = "Jakub"
+var you_name = "You"
 
 var audioContext = null;
 var audioWorkletNode = null;
@@ -246,6 +246,10 @@ function initWebSocket() {
                 you_name = "Jakub";
                 img_src = "2.png";
             }
+            else {
+                you_name = "You";
+                img_src = "1.png";
+            }
 
             new_transcription_element(you_name, img_src);
             new_text_element("<p>" +  data["segments"][0].text + "</p>", "transcription-" + available_transcription_elements);
@@ -266,7 +270,7 @@ function initWebSocket() {
 
             if (new_llm_element_state) {
                 available_llm_elements = available_llm_elements + 1
-                new_transcription_element("AT&T GLM-4", "1.png");
+                new_transcription_element("AT&T", "att.png");
                 new_text_element("<p>" +  data["llm_output"] + "</p>", "llm-" + available_llm_elements);
                 new_llm_element_state = false;
             }
