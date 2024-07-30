@@ -104,7 +104,7 @@ class TranscriptionServer:
             Exception: If there is an error during the audio frame processing.
         """
         self.vad_model = VoiceActivityDetection()
-        self.vad_threshold = 0.5
+        self.vad_threshold = 0.65
 
         logging.info("[Whisper INFO:] New client connected")
         options = websocket.recv()
