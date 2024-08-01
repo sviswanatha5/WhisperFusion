@@ -1,0 +1,6 @@
+fastapi
+tranformers
+torch
+sentencepiece
+protobuf
+einops
