@@ -42,7 +42,7 @@ class ConversationHistory:
         {% for message in messages %}
         {{ '<|im_start|>' + message['speaker'] + '\n' + message['message'] | trim + '<|im_end|>\n' }}
         {% endfor %}
-        {{ '<|im_start|> Respond in 50 words or less. Answer in' + langauge +  '<|im_end|> \n <|im_start|> assistant\n'}}"""
+        {{ '<|im_start|> Respond in 50 words or less. Answer in' + language +  '<|im_end|> \n <|im_start|> assistant\n'}}"""
         t = Template(template)
         return t.render(messages=self.history, add_generation_prompt=add_generation_prompt, language = self.languages[language])
     
