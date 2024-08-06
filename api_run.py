@@ -9,7 +9,7 @@ from transformers import TextStreamer
 import threading
 
 
-device = "cuda:2"
+device = "cuda:3"
 
 class StopSignal:
     """A unique class to signal stopping the streamer."""

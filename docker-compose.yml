@@ -22,7 +22,9 @@ services:
       resources:
         reservations:
           devices:
-            - capabilities: ["gpu"]
+            - driver: nvidia
+              device_ids: ['1','2'] 
+              capabilities: [gpu]
     entrypoint: ["/root/scratch-space/run-whisperfusion.sh"]
 
   nginx:

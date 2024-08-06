@@ -38,7 +38,7 @@ if __name__ == "__main__":
         import sys
         sys.exit(0)
 
-    multiprocessing.set_start_method('spawn')
+    multiprocessing.set_start_method('spawn', force=True)
         
     manager = Manager()
     shared_output = manager.list()
