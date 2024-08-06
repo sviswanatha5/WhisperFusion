@@ -103,10 +103,10 @@ class CustomLLMAPI:
                     # flag = False
                     event.set()
                     llm_queue_feed = llm_queue_feed[:-10]
-                # if "<|endoftext|>" in llm_queue_feed:
-                #     self.eos = True
-                #     event.set()
-                #     llm_queue_feed = llm_queue_feed[:-13]
+                if "<|endoftext|>" in llm_queue_feed:
+                    self.eos = True
+                    event.set()
+                    llm_queue_feed = llm_queue_feed[:-13]
                 if user not in self.llm_queue:
                     self.llm_queue[user] = []
                 self.llm_queue[user] += [{
