@@ -42,7 +42,7 @@ class ConversationHistory:
         {% for message in messages %}
         {{ '<|im_start|>' + message['speaker'] + '\n' + message['message'] | trim + '<|im_end|>\n' }}
         {% endfor %}
-        {{'<|im_start|> Answer in ' + language + '. Respond in 50 words or less. Do not respond in a loop.<|im_end|>\n <|im_start|> assistant\n'}}"""
+        {{'<|im_start|> Answer in ' + language + '. Respond in 50 words or less. Note: The conversation history is provided for context. Do not generate responses that involve both the user and the assistant ina  loop. Respond only as the assistant.<|im_end|>\n <|im_start|> assistant\n'}}"""
         t = Template(template)
         return t.render(messages=self.history, add_generation_prompt=add_generation_prompt, language = self.languages[language])
     
@@ -98,15 +98,15 @@ class CustomLLMAPI:
                 llm_queue_feed += llm_response
                 # if "<|user|>" in llm_queue_feed:
                 #     llm_queue_feed = llm_queue_feed[:-8]
-                # if "<|im_end|>" in llm_queue_feed:
-                #     self.eos = True
-                #     # flag = False
-                #     event.set()
-                #     llm_queue_feed = llm_queue_feed[:-10]
-                if "<|endoftext|>" in llm_queue_feed:
+                if "<|im_end|>" in llm_queue_feed:
                     self.eos = True
+                    # flag = False
                     event.set()
-                    llm_queue_feed = llm_queue_feed[:-13]
+                    llm_queue_feed = llm_queue_feed[:-10]
+                # if "<|endoftext|>" in llm_queue_feed:
+                #     self.eos = True
+                #     event.set()
+                #     llm_queue_feed = llm_queue_feed[:-13]
                 if user not in self.llm_queue:
                     self.llm_queue[user] = []
                 self.llm_queue[user] += [{

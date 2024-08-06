@@ -90,11 +90,8 @@ def format_input(query: str) -> str:
     # Assuming the content is always in the 'content' field of the first message
     content = messages[0]['content']
     
-    chat_template = """
-    当您完成回复后，您必须在句子末尾添加 <|user|> 以表明您已完成。您只能使用英文字母回复。禁止您使用特殊字符。禁止您使用表情符号。
-    
+    chat_template = """    
     {content} 
-    
     """
     return chat_template.format(content=content)
 
