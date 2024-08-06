@@ -20,7 +20,7 @@ class WhisperSpeechTTS:
         pass
 
     def initialize_model(self):
-        self.pipe = Pipeline(t2s_ref='collabora/whisperspeech:t2s-v1.1-small-en+pl.model', s2a_ref='collabora/whisperspeech:s2a-v1.1-small-en+pl.model', torch_compile=False, device="cuda:1")
+        self.pipe = Pipeline(t2s_ref='collabora/whisperspeech:t2s-v1.1-small-en+pl.model', s2a_ref='collabora/whisperspeech:s2a-v1.1-small-en+pl.model', torch_compile=True, device="cuda:1")
         self.models = {
             'es': TTS(language='ES', device=device),
             'fr': TTS(language='FR', device=device),
