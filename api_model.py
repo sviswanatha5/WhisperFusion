@@ -38,11 +38,11 @@ class ConversationHistory:
         self.history.append({"speaker": speaker, "message": message})
 
     def get_formatted_history(self, language, add_generation_prompt=True):
-        template = """<|im_start|> This is the current conversation history between a user and assistant. Answer in ' + language + '. Respond in 50 words or less. Note: The conversation history is provided for context. Do not generate responses that involve both the user and the assistant in a loop. Respond only as the assistant.<|im_end|> \n
+        template = """<|im_start|> This is the current conversation history between a user and assistant. Note: The conversation history is provided for context. Do not generate responses that involve both the user and the assistant in a loop. Respond only as the assistant.<|im_end|> \n
         {% for message in messages %}
         {{ '<|im_start|>' + message['speaker'] + '\n' + message['message'] | trim + '<|im_end|>\n' }}
         {% endfor %}
-        {{ '<|im_start|> assistant\n'}}"""
+        {{ '<|im_start|> Respond in 50 words or less. Answer in' + langauge +  '<|im_end|> \n <|im_start|> assistant\n'}}"""
         t = Template(template)
         return t.render(messages=self.history, add_generation_prompt=add_generation_prompt, language = self.languages[language])
     
