@@ -9,5 +9,5 @@ cd /root/scratch-space/
 cd /root/WhisperFusion
 exec python3 api_main.py --phi \
                 --whisper_tensorrt_path /root/scratch-space/models/whisper_medium \
-                --api_url ws://12.1.52.180:8001/ws
+                --api_url ws://12.1.52.176:8001/ws
 

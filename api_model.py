@@ -96,13 +96,17 @@ class CustomLLMAPI:
                     continue
                 self.infer_time = time.time() - start
                 llm_queue_feed += llm_response
-                if "<|user|>" in llm_queue_feed:
-                    llm_queue_feed = llm_queue_feed[:-8]
-                if "<|im_end|>" in llm_queue_feed:
+                # if "<|user|>" in llm_queue_feed:
+                #     llm_queue_feed = llm_queue_feed[:-8]
+                # if "<|im_end|>" in llm_queue_feed:
+                #     self.eos = True
+                #     # flag = False
+                #     event.set()
+                #     llm_queue_feed = llm_queue_feed[:-10]
+                if "<|endoftext|>" in llm_queue_feed:
                     self.eos = True
-                    # flag = False
                     event.set()
-                    llm_queue_feed = llm_queue_feed[:-10]
+                    llm_queue_feed = llm_queue_feed[:-13]
                 if user not in self.llm_queue:
                     self.llm_queue[user] = []
                 self.llm_queue[user] += [{

@@ -9,7 +9,7 @@ from transformers import TextStreamer
 import threading
 
 
-device = "cuda:3"
+device = "cuda:1"
 
 class StopSignal:
     """A unique class to signal stopping the streamer."""
@@ -70,7 +70,7 @@ tokenizer = None
 
 async def load_model():
     global model, tokenizer
-    model_name = "internlm/internlm2_5-7b-chat-1m"
+    model_name = "Qwen/Qwen2-7B"
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
     model = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=True)
     model.to(device)

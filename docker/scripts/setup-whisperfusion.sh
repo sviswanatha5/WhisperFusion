@@ -5,36 +5,28 @@
 
 cd WhisperFusion
 
-MARKER_FILE="setup_complete.marker"
+apt update 
 
+apt install ffmpeg portaudio19-dev -y
 
-# Clone this repo and install requirements if the marker file doesn't exist
-if [ ! -f "$MARKER_FILE" ]; then
-    apt update 
+## Install torchaudio matching the PyTorch from the base image
+pip install --extra-index-url https://download.pytorch.org/whl/cu121 torchaudio==2.1.0
 
-    apt install ffmpeg portaudio19-dev -y
+## Install all the other dependencies normally
+pip install -r requirements.txt
 
-    ## Install torchaudio matching the PyTorch from the base image
-    pip install --extra-index-url https://download.pytorch.org/whl/cu121 torchaudio==2.1.0
+## force update huggingface_hub (tokenizers 0.14.1 spuriously require and ancient <=0.18 version)
+pip install -U huggingface_hub
 
-    ## Install all the other dependencies normally
-    pip install -r requirements.txt
+huggingface-cli download collabora/whisperspeech t2s-small-en+pl.model s2a-q4-tiny-en+pl.model
+huggingface-cli download charactr/vocos-encodec-24khz
 
-    ## force update huggingface_hub (tokenizers 0.14.1 spuriously require and ancient <=0.18 version)
-    pip install -U huggingface_hub
+git clone https://github.com/collabora/WhisperSpeech.git
+pip install -e "./WhisperSpeech[whisperspeech]"
 
-    huggingface-cli download collabora/whisperspeech t2s-small-en+pl.model s2a-q4-tiny-en+pl.model
-    huggingface-cli download charactr/vocos-encodec-24khz
+mkdir -p /root/.cache/torch/hub/checkpoints/
+curl -L -o /root/.cache/torch/hub/checkpoints/encodec_24khz-d7cc33bc.th https://dl.fbaipublicfiles.com/encodec/v0/encodec_24khz-d7cc33bc.th
+mkdir -p /root/.cache/whisper-live/
+curl -L -o /root/.cache/whisper-live/silero_vad.onnx https://github.com/snakers4/silero-vad/raw/master/files/silero_vad.onnx
 
-    git clone https://github.com/collabora/WhisperSpeech.git
-    pip install -e "./WhisperSpeech[whisperspeech]"
-
-    mkdir -p /root/.cache/torch/hub/checkpoints/
-    curl -L -o /root/.cache/torch/hub/checkpoints/encodec_24khz-d7cc33bc.th https://dl.fbaipublicfiles.com/encodec/v0/encodec_24khz-d7cc33bc.th
-    mkdir -p /root/.cache/whisper-live/
-    curl -L -o /root/.cache/whisper-live/silero_vad.onnx https://github.com/snakers4/silero-vad/raw/master/files/silero_vad.onnx
-
-    python -c 'from transformers.utils.hub import move_cache; move_cache()'
-else
-    echo "Main setup done, cloning git"
-fi
+python -c 'from transformers.utils.hub import move_cache; move_cache()'
