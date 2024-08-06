@@ -110,7 +110,8 @@ async def generate_text(query: str, streamer: CustomStreamer, stop_event: asynci
         "top_p": 0.1,
         "top_k": 1,
         "do_sample": True,
-        "streamer": streamer
+        "streamer": streamer,
+        "language": 'en'
     }
     
     def stock_checking_generate():
